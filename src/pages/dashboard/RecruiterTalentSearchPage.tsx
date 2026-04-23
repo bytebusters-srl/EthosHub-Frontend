@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ElementType } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase,
   ChevronLeft,
@@ -12,6 +12,7 @@ import {
   Sparkles,
   Star,
   Users,
+  X,
   Zap,
 } from 'lucide-react';
 import { useAuthStore } from '@/store';
@@ -132,6 +133,7 @@ export default function RecruiterTalentSearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [visibleCandidates, setVisibleCandidates] = useState(recruiterTalentProfiles);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const filteredCandidates = useMemo(() => {
     return recruiterTalentProfiles.filter((candidate) => {
@@ -222,23 +224,23 @@ export default function RecruiterTalentSearchPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-full space-y-4 overflow-x-hidden p-4 md:space-y-6 md:p-6 bg-gray-50 dark:bg-black min-h-screen">
       <motion.section
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="overflow-hidden rounded-[2rem] border border-border bg-[radial-gradient(circle_at_top_left,rgba(14,165,233,0.16),transparent_32%),radial-gradient(circle_at_top_right,rgba(249,115,22,0.12),transparent_30%),linear-gradient(135deg,#ffffff_0%,#f8fafc_52%,#ecfeff_100%)]"
+        className="overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-violet-50 md:rounded-[2rem] dark:border-white/10 dark:bg-gradient-to-br dark:from-zinc-950 dark:via-black dark:to-violet-950/20"
       >
-        <div className="grid gap-6 px-6 py-7 lg:grid-cols-[1.25fr_0.75fr] lg:px-8">
+        <div className="grid gap-6 px-4 py-6 md:px-6 md:py-7 lg:grid-cols-[1.25fr_0.75fr] lg:px-8">
           <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-background/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-600 dark:border-violet-500/30 dark:bg-black/50 dark:text-violet-400">
               <Sparkles className="h-3.5 w-3.5" />
               Dashboard de reclutador
             </div>
             <div>
-              <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              <h1 className="max-w-3xl text-2xl font-semibold tracking-tight text-black sm:text-3xl lg:text-4xl dark:text-white">
                 Encuentra talento por habilidades, seniority y contexto real de trabajo
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600 sm:text-base dark:text-gray-400">
                 Busca perfiles profesionales por hard skills, soft skills y nivel de dominio. Esta
                 version usa resultados estaticos para que puedas evaluar el apartado del reclutador
                 desde ya.
@@ -250,24 +252,24 @@ export default function RecruiterTalentSearchPage() {
                 event.preventDefault();
                 handleSearch();
               }}
-              className="rounded-[1.5rem] border border-border bg-background/85 p-3 shadow-sm"
+              className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm md:rounded-[1.5rem] dark:border-white/10 dark:bg-zinc-950"
             >
               <div className="flex flex-col gap-3 lg:flex-row">
                 <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                   <Input
                     value={searchDraft}
                     onChange={(event) => setSearchDraft(event.target.value)}
                     placeholder="Busca por React, Java, liderazgo, AWS..."
-                    className="h-12 rounded-2xl border-0 bg-muted/60 pl-11 text-sm shadow-none focus-visible:ring-1"
+                    className="h-12 rounded-xl border border-gray-200 bg-gray-50 pl-11 text-sm text-black placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-violet-500 md:rounded-2xl dark:border-white/10 dark:bg-black dark:text-white dark:placeholder:text-gray-500"
                   />
                 </div>
-                <Button type="submit" className="h-12 rounded-2xl px-6">
+                <Button type="submit" className="h-12 rounded-xl px-6 md:rounded-2xl bg-violet-600 text-white hover:bg-violet-700">
                   Buscar talento
                 </Button>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
                   Sugerencias
                 </span>
                 {smartSearches.map((term) => (
@@ -275,7 +277,7 @@ export default function RecruiterTalentSearchPage() {
                     key={term}
                     type="button"
                     onClick={() => handleSearch(term)}
-                    className="rounded-full border border-border bg-background px-3 py-1 text-sm text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                    className="rounded-full border border-gray-200 bg-white px-3 py-1 text-sm text-black transition-colors hover:border-violet-500/40 hover:text-violet-600 dark:border-white/10 dark:bg-black/40 dark:text-white dark:hover:border-violet-500/50 dark:hover:text-violet-400"
                   >
                     {term}
                   </button>
@@ -284,7 +286,7 @@ export default function RecruiterTalentSearchPage() {
             </form>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
             <RecruiterStatCard
               icon={Users}
               label="Talento disponible"
@@ -307,19 +309,109 @@ export default function RecruiterTalentSearchPage() {
         </div>
       </motion.section>
 
-      <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden">
+        <Button 
+          onClick={() => setShowMobileFilters(true)}
+          variant="outline" 
+          className="w-full gap-2 rounded-xl border border-gray-200 bg-white text-black dark:border-white/10 dark:bg-zinc-950 dark:text-white"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Filtros
+          {activeFilterCount > 0 && (
+            <Badge variant="secondary" className="ml-1 bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400">
+              {activeFilterCount}
+            </Badge>
+          )}
+        </Button>
+      </div>
+
+      {/* Mobile Filter Drawer */}
+      <AnimatePresence>
+        {showMobileFilters && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden"
+              onClick={() => setShowMobileFilters(false)}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-sm overflow-y-auto border-l border-gray-200 bg-white p-6 shadow-xl lg:hidden dark:border-white/10 dark:bg-zinc-950"
+            >
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-black dark:text-white">Filtros de busqueda</h2>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/10"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <Select
+                  label="Tipo de coincidencia"
+                  value={scope}
+                  options={scopeOptions}
+                  onChange={(event) => setScope(event.target.value as SkillScope)}
+                />
+                <Select
+                  label="Nivel de dominio"
+                  value={level}
+                  options={levelOptions}
+                  onChange={(event) => setLevel(event.target.value as LevelFilter)}
+                />
+                <Select
+                  label="Modalidad"
+                  value={workMode}
+                  options={workModeOptions}
+                  onChange={(event) => setWorkMode(event.target.value as WorkModeFilter)}
+                />
+                <Select
+                  label="Disponibilidad"
+                  value={availability}
+                  options={availabilityOptions}
+                  onChange={(event) => setAvailability(event.target.value as AvailabilityFilter)}
+                />
+                <Select
+                  label="Ubicacion"
+                  value={location}
+                  options={locationOptions}
+                  onChange={(event) => setLocation(event.target.value)}
+                />
+                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-white/10 mt-4">
+                  <Button variant="outline" className="flex-1 rounded-xl border-gray-200 text-black dark:border-white/20 dark:text-white" onClick={clearFilters}>
+                    Limpiar
+                  </Button>
+                  <Button className="flex-1 rounded-xl bg-violet-600 text-white hover:bg-violet-700" onClick={() => setShowMobileFilters(false)}>
+                    Aplicar
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[300px_1fr]">
+        {/* Desktop Filter Sidebar */}
         <motion.aside
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
-          className="space-y-4"
+          className="hidden space-y-4 lg:block"
         >
-          <Card className="rounded-[1.75rem] p-0">
-            <CardHeader className="border-b border-border px-5 py-5">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <SlidersHorizontal className="h-4 w-4 text-primary" />
+          <Card className="rounded-2xl border border-gray-200 bg-white p-0 dark:border-white/10 dark:bg-zinc-950">
+            <CardHeader className="border-b border-gray-200 px-5 py-5 dark:border-white/10">
+              <CardTitle className="flex items-center gap-2 text-base text-black dark:text-white">
+                <SlidersHorizontal className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                 Filtros de busqueda
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-500 dark:text-gray-400">
                 Refina la lista por tipo de habilidad, seniority y contexto laboral.
               </CardDescription>
             </CardHeader>
@@ -355,16 +447,16 @@ export default function RecruiterTalentSearchPage() {
                 onChange={(event) => setLocation(event.target.value)}
               />
 
-              <Button variant="outline" className="w-full rounded-2xl" onClick={clearFilters}>
+              <Button variant="outline" className="w-full rounded-xl border-gray-200 text-black hover:bg-gray-50 dark:border-white/20 dark:text-white dark:hover:bg-white/10" onClick={clearFilters}>
                 Limpiar busqueda
               </Button>
 
-              <div className="rounded-2xl bg-muted/60 p-4 text-sm text-muted-foreground">
-                <p className="font-medium text-foreground">Tip de reclutamiento</p>
+              <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-600 dark:bg-black/50 dark:text-gray-400">
+                <p className="font-medium text-black dark:text-white">Tip de reclutamiento</p>
                 <p className="mt-2 leading-6">
-                  Prueba combinaciones como <span className="font-medium text-foreground">Java</span>{' '}
-                  + <span className="font-medium text-foreground">Senior</span> o{' '}
-                  <span className="font-medium text-foreground">liderazgo</span> en soft skills para
+                  Prueba combinaciones como <span className="font-medium text-black dark:text-white">Java</span>{' '}
+                  + <span className="font-medium text-black dark:text-white">Senior</span> o{' '}
+                  <span className="font-medium text-black dark:text-white">liderazgo</span> en soft skills para
                   validar el flujo de filtrado.
                 </p>
               </div>
@@ -376,25 +468,27 @@ export default function RecruiterTalentSearchPage() {
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-3 rounded-[1.75rem] border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between md:rounded-[1.75rem] md:p-5 dark:border-white/10 dark:bg-zinc-950"
           >
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-xl font-semibold text-foreground">Resultados</h2>
-                <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <h2 className="text-lg font-semibold text-black sm:text-xl dark:text-white">Resultados</h2>
+                <Badge variant="secondary" className="bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400">
                   {isLoading ? 'Buscando...' : `${visibleCandidates.length} candidatos`}
                 </Badge>
                 {activeFilterCount > 0 && (
-                  <Badge variant="outline">{activeFilterCount} filtros activos</Badge>
+                  <Badge variant="outline" className="border-gray-200 text-gray-600 dark:border-white/20 dark:text-gray-300">
+                    {activeFilterCount} filtros activos
+                  </Badge>
                 )}
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {searchQuery
                   ? `Busqueda actual: "${searchQuery}"`
                   : 'Mostrando el universo base de talento disponible para reclutamiento.'}
               </p>
             </div>
-            <div className="rounded-2xl bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
+            <div className="rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-500 dark:bg-black/50 dark:text-gray-400">
               {isLoading
                 ? 'Actualizando resultados...'
                 : `Mostrando ${firstResult}-${lastResult} de ${visibleCandidates.length} perfiles`}
@@ -404,9 +498,9 @@ export default function RecruiterTalentSearchPage() {
           {isLoading ? (
             <div className="grid gap-4 lg:grid-cols-2">
               {Array.from({ length: 4 }).map((_, index) => (
-                <Card key={index} className="rounded-[1.75rem] p-5">
+                <Card key={index} className="rounded-xl border-gray-200 bg-white p-4 md:rounded-[1.75rem] md:p-5 dark:border-white/10 dark:bg-zinc-950">
                   <div className="flex items-start gap-4">
-                    <Skeleton className="h-16 w-16 rounded-2xl" />
+                    <Skeleton className="h-16 w-16 rounded-xl md:rounded-2xl" />
                     <div className="flex-1 space-y-3">
                       <Skeleton className="h-5 w-44" />
                       <Skeleton className="h-4 w-full" />
@@ -422,7 +516,7 @@ export default function RecruiterTalentSearchPage() {
               ))}
             </div>
           ) : visibleCandidates.length === 0 ? (
-            <Card className="rounded-[1.75rem]">
+            <Card className="rounded-xl border border-gray-200 bg-white md:rounded-[1.75rem] dark:border-white/10 dark:bg-zinc-950">
               <EmptyState
                 icon={Briefcase}
                 title="No se encontraron candidatos con esta habilidad."
@@ -454,22 +548,22 @@ export default function RecruiterTalentSearchPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.04 }}
                     >
-                      <Card className="h-full rounded-[1.75rem] border-border/90 p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                      <Card className="h-full rounded-xl border border-gray-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-violet-500/40 hover:shadow-lg md:rounded-[1.75rem] md:p-5 dark:border-white/10 dark:bg-[#050505] dark:hover:border-violet-500/50">
                         <div className="flex items-start justify-between gap-4">
-                          <div className="flex min-w-0 gap-4">
+                          <div className="flex min-w-0 gap-3 sm:gap-4">
                             <Avatar
                               src={candidate.user.avatar}
                               alt={candidate.user.name}
                               fallback={candidate.user.name}
                               size="xl"
-                              className="rounded-[1.5rem]"
+                              className="shrink-0 rounded-xl md:rounded-[1.5rem]"
                             />
                             <div className="min-w-0">
-                              <h3 className="text-lg font-semibold text-foreground">
+                              <h3 className="text-base font-semibold text-black sm:text-lg dark:text-white">
                                 {candidate.user.name}
                               </h3>
-                              <p className="text-sm font-medium text-primary">{candidate.expectedRole}</p>
-                              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                              <p className="text-sm font-medium text-violet-600 dark:text-violet-400">{candidate.expectedRole}</p>
+                              <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
                                 {candidate.user.headline}
                               </p>
                             </div>
@@ -483,19 +577,19 @@ export default function RecruiterTalentSearchPage() {
                           </Badge>
                         </div>
 
-                        <div className="mt-5 flex flex-wrap gap-2 text-xs">
-                          <Badge variant="outline">{candidate.experienceYears}+ anos</Badge>
-                          <Badge variant="outline">{candidate.workMode}</Badge>
-                          <Badge variant="outline">{candidate.user.location}</Badge>
+                        <div className="mt-4 flex flex-wrap gap-2 text-xs sm:mt-5">
+                          <Badge variant="outline" className="border-gray-200 text-gray-600 dark:border-white/20 dark:text-gray-400">{candidate.experienceYears}+ anos</Badge>
+                          <Badge variant="outline" className="border-gray-200 text-gray-600 dark:border-white/20 dark:text-gray-400">{candidate.workMode}</Badge>
+                          <Badge variant="outline" className="border-gray-200 text-gray-600 dark:border-white/20 dark:text-gray-400">{candidate.user.location}</Badge>
                         </div>
 
-                        <div className="mt-5 rounded-2xl bg-muted/55 p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        <div className="mt-4 rounded-xl bg-gray-50 p-3 sm:mt-5 sm:p-4 dark:bg-black/50">
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
                             Top 3 skills
                           </p>
-                          <div className="mt-3 flex flex-wrap gap-2">
+                          <div className="mt-2 flex flex-wrap gap-2 sm:mt-3">
                             {topSkills.map((skill) => (
-                              <Badge key={skill} variant="secondary" className="bg-background">
+                              <Badge key={skill} variant="secondary" className="bg-white text-black dark:bg-zinc-800 dark:text-white">
                                 {skill}
                               </Badge>
                             ))}
@@ -503,35 +597,35 @@ export default function RecruiterTalentSearchPage() {
                         </div>
 
                         <div className="mt-4">
-                          <p className="text-sm leading-6 text-muted-foreground">{candidate.summary}</p>
+                          <p className="line-clamp-3 text-sm leading-6 text-gray-600 dark:text-gray-400">{candidate.summary}</p>
                         </div>
 
                         <div className="mt-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
                             Coincidencias detectadas
                           </p>
-                          <div className="mt-3 flex flex-wrap gap-2">
+                          <div className="mt-2 flex flex-wrap gap-2 sm:mt-3">
                             {matchBadges.length > 0 ? (
                               matchBadges.map((match) => (
-                                <Badge key={match} className="bg-primary/10 text-primary">
+                                <Badge key={match} className="bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400">
                                   {match}
                                 </Badge>
                               ))
                             ) : (
-                              <span className="text-sm text-muted-foreground">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
                                 Vista general del perfil sin filtro especifico.
                               </span>
                             )}
                           </div>
                         </div>
 
-                        <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4">
-                          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between dark:border-white/10">
+                          <div className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                             <MapPin className="h-4 w-4" />
                             {candidate.user.location}
                           </div>
                           <Link to={`/p/${candidate.user.slug}`}>
-                            <Button className="rounded-2xl">Ver perfil</Button>
+                            <Button className="w-full rounded-xl bg-violet-600 text-white hover:bg-violet-700 sm:w-auto md:rounded-2xl">Ver perfil</Button>
                           </Link>
                         </div>
                       </Card>
@@ -541,8 +635,8 @@ export default function RecruiterTalentSearchPage() {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex flex-col gap-3 rounded-[1.75rem] border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between md:rounded-[1.75rem] dark:border-white/10 dark:bg-zinc-950">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Pagina {currentPage} de {totalPages}
                   </p>
                   <div className="flex items-center gap-2">
@@ -550,6 +644,7 @@ export default function RecruiterTalentSearchPage() {
                       variant="outline"
                       onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
                       disabled={currentPage === 1}
+                      className="border-gray-200 text-black dark:border-white/20 dark:text-white"
                     >
                       <ChevronLeft className="h-4 w-4" />
                       Anterior
@@ -558,7 +653,7 @@ export default function RecruiterTalentSearchPage() {
                       <Button
                         key={page}
                         variant={page === currentPage ? 'primary' : 'outline'}
-                        className="min-w-10"
+                        className={`min-w-10 ${page !== currentPage ? 'border-gray-200 text-black dark:border-white/20 dark:text-white' : 'bg-violet-600 text-white'}`}
                         onClick={() => setCurrentPage(page)}
                       >
                         {page}
@@ -568,6 +663,7 @@ export default function RecruiterTalentSearchPage() {
                       variant="outline"
                       onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
                       disabled={currentPage === totalPages}
+                      className="border-gray-200 text-black dark:border-white/20 dark:text-white"
                     >
                       Siguiente
                       <ChevronRight className="h-4 w-4" />
@@ -579,27 +675,6 @@ export default function RecruiterTalentSearchPage() {
           )}
         </section>
       </div>
-
-      <Card className="rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(14,165,233,0.08),rgba(249,115,22,0.08))]">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-              Estado de demo
-            </p>
-            <h3 className="mt-2 text-xl font-semibold text-foreground">
-              Hola {user?.name?.split(' ')[0]}, este apartado ya quedo listo para reclutador
-            </h3>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              La vista funciona con perfiles estaticos, filtros asincronos, estado vacio amigable,
-              tarjetas con top skills y acceso a perfil publico para continuar la navegacion.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Filter className="h-4 w-4 text-primary" />
-            Preparado para luego conectar backend real
-          </div>
-        </div>
-      </Card>
     </div>
   );
 }
@@ -616,16 +691,16 @@ function RecruiterStatCard({
   helper: string;
 }) {
   return (
-    <Card className="rounded-[1.5rem] border-background/80 bg-background/85 p-5">
+    <Card className="rounded-xl border border-gray-200 bg-white p-4 md:rounded-[1.5rem] md:p-5 dark:border-white/10 dark:bg-zinc-950">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
             {label}
           </p>
-          <p className="mt-2 text-3xl font-semibold text-foreground">{value}</p>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{helper}</p>
+          <p className="mt-2 text-2xl font-semibold text-black sm:text-3xl dark:text-white">{value}</p>
+          <p className="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">{helper}</p>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 sm:h-12 sm:w-12 sm:rounded-2xl dark:bg-violet-500/20 dark:text-violet-400">
           <Icon className="h-5 w-5" />
         </div>
       </div>

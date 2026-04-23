@@ -126,16 +126,16 @@ export function AccountSecurityCard() {
   const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
 
   return (
-    <Card className="border-destructive/20 bg-card p-0 sm:p-0">
+    <Card className="w-full border-gray-200 bg-white p-0 sm:p-0 dark:border-white/10 dark:bg-zinc-950">
       {/* Header */}
-      <div className="border-b border-border p-5 sm:p-6">
+      <div className="border-b border-gray-200 p-4 sm:p-6 dark:border-white/10">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 sm:h-11 sm:w-11 sm:rounded-2xl dark:bg-red-500/10 dark:text-red-400">
             <Shield className="h-5 w-5" />
           </div>
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">Seguridad de la Cuenta</h2>
-            <p className="text-sm text-muted-foreground">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-black sm:text-xl dark:text-white">Seguridad de la Cuenta</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Gestiona tu contrasena y correo electronico
             </p>
           </div>
@@ -143,25 +143,25 @@ export function AccountSecurityCard() {
       </div>
 
       {/* Change Password Section */}
-      <div className="border-b border-border">
+      <div className="border-b border-gray-200 dark:border-white/10">
         <button
           type="button"
           onClick={() => toggleSection('password')}
-          className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-muted/50 sm:p-6"
+          className="flex w-full items-center justify-between gap-2 p-4 text-left transition-colors hover:bg-gray-50 sm:p-6 dark:hover:bg-white/5"
         >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 sm:h-10 sm:w-10 dark:bg-violet-500/10 dark:text-violet-400">
               <Key className="h-4 w-4" />
             </div>
-            <div>
-              <p className="font-medium text-foreground">Cambiar Contrasena</p>
-              <p className="text-sm text-muted-foreground">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-black sm:text-base dark:text-white">Cambiar Contrasena</p>
+              <p className="truncate text-xs text-gray-500 sm:text-sm dark:text-gray-400">
                 Actualiza tu contrasena de acceso
               </p>
             </div>
           </div>
           <ChevronDown
-            className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${
+            className={`h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 dark:text-gray-500 ${
               expandedSection === 'password' ? 'rotate-180' : ''
             }`}
           />
@@ -176,34 +176,34 @@ export function AccountSecurityCard() {
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
-              <div className="space-y-5 border-t border-border bg-muted/30 p-5 sm:p-6">
+              <div className="space-y-5 border-t border-gray-200 bg-gray-50 p-5 sm:p-6 dark:border-white/10 dark:bg-black/30">
                 {passwordSuccess ? (
                   <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="flex flex-col items-center gap-3 py-6 text-center"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
                       <CheckCircle2 className="h-7 w-7" />
                     </div>
-                    <p className="text-lg font-medium text-foreground">
+                    <p className="text-lg font-medium text-black dark:text-white">
                       Contrasena actualizada
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Tu contrasena ha sido cambiada exitosamente.
                     </p>
                   </motion.div>
                 ) : !passwordOtpSent ? (
                   <>
                     {/* Step 1: Request OTP */}
-                    <div className="rounded-xl border border-border bg-background p-4">
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-black/50">
                       <div className="flex items-start gap-3">
-                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400" />
                         <div>
-                          <p className="text-sm font-medium text-foreground">
+                          <p className="text-sm font-medium text-black dark:text-white">
                             Verificacion requerida
                           </p>
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Por seguridad, enviaremos un codigo de 6 digitos a tu correo electronico
                             para confirmar tu identidad.
                           </p>
@@ -213,18 +213,18 @@ export function AccountSecurityCard() {
 
                     <div className="flex gap-3">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => toggleSection(null)}
+                        className="border-gray-200 bg-white text-black hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/10"
                       >
                         Cancelar
                       </Button>
                       <Button
-                        variant="primary"
                         onClick={handleSendPasswordOtp}
-                        loading={passwordLoading}
-                        className="bg-primary-blue hover:bg-primary-blue/90"
+                        disabled={passwordLoading}
+                        className="bg-violet-600 text-white hover:bg-violet-700"
                       >
-                        Enviar Codigo
+                        {passwordLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Enviar Codigo'}
                       </Button>
                     </div>
                   </>
@@ -234,36 +234,38 @@ export function AccountSecurityCard() {
                     <div className="space-y-4">
                       {/* OTP Input */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
+                        <label className="text-sm font-medium text-black dark:text-white">
                           Codigo de verificacion
                         </label>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           Ingresa el codigo de 6 digitos enviado a tu correo
                         </p>
-                        <div className="flex justify-center py-2">
-                          <InputOTP
-                            maxLength={6}
-                            value={passwordOtp}
-                            onChange={setPasswordOtp}
-                          >
-                            <InputOTPGroup>
-                              <InputOTPSlot index={0} />
-                              <InputOTPSlot index={1} />
-                              <InputOTPSlot index={2} />
-                            </InputOTPGroup>
-                            <InputOTPSeparator />
-                            <InputOTPGroup>
-                              <InputOTPSlot index={3} />
-                              <InputOTPSlot index={4} />
-                              <InputOTPSlot index={5} />
-                            </InputOTPGroup>
-                          </InputOTP>
+                        <div className="flex justify-center overflow-x-auto py-2">
+                          <div className="scale-90 sm:scale-100">
+                            <InputOTP
+                              maxLength={6}
+                              value={passwordOtp}
+                              onChange={setPasswordOtp}
+                            >
+                              <InputOTPGroup>
+                                <InputOTPSlot index={0} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                                <InputOTPSlot index={1} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                                <InputOTPSlot index={2} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                              </InputOTPGroup>
+                              <InputOTPSeparator />
+                              <InputOTPGroup>
+                                <InputOTPSlot index={3} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                                <InputOTPSlot index={4} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                                <InputOTPSlot index={5} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
                         </div>
                       </div>
 
                       {/* Current Password */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
+                        <label className="text-sm font-medium text-black dark:text-white">
                           Contrasena Actual
                         </label>
                         <div className="relative">
@@ -272,12 +274,12 @@ export function AccountSecurityCard() {
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
                             placeholder="Ingresa tu contrasena actual"
-                            className="w-full rounded-xl border border-border bg-background px-4 py-3 pr-12 text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-black placeholder:text-gray-400 transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/20 dark:bg-black dark:text-white dark:placeholder:text-gray-500"
                           />
                           <button
                             type="button"
                             onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
                           >
                             {showCurrentPassword ? (
                               <EyeOff className="h-4 w-4" />
@@ -290,7 +292,7 @@ export function AccountSecurityCard() {
 
                       {/* New Password */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
+                        <label className="text-sm font-medium text-black dark:text-white">
                           Nueva Contrasena
                         </label>
                         <div className="relative">
@@ -299,12 +301,12 @@ export function AccountSecurityCard() {
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             placeholder="Ingresa tu nueva contrasena"
-                            className="w-full rounded-xl border border-border bg-background px-4 py-3 pr-12 text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-black placeholder:text-gray-400 transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/20 dark:bg-black dark:text-white dark:placeholder:text-gray-500"
                           />
                           <button
                             type="button"
                             onClick={() => setShowNewPassword(!showNewPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
                           >
                             {showNewPassword ? (
                               <EyeOff className="h-4 w-4" />
@@ -320,7 +322,7 @@ export function AccountSecurityCard() {
 
                       {/* Confirm Password */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
+                        <label className="text-sm font-medium text-black dark:text-white">
                           Confirmar Nueva Contrasena
                         </label>
                         <div className="relative">
@@ -329,18 +331,18 @@ export function AccountSecurityCard() {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Confirma tu nueva contrasena"
-                            className={`w-full rounded-xl border bg-background px-4 py-3 pr-12 text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 ${
+                            className={`w-full rounded-xl border bg-white px-4 py-3 pr-12 text-black placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-1 dark:bg-black dark:text-white dark:placeholder:text-gray-500 ${
                               confirmPassword && !passwordsMatch
-                                ? 'border-destructive focus:border-destructive focus:ring-destructive/20'
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                                 : confirmPassword && passwordsMatch
-                                  ? 'border-success focus:border-success focus:ring-success/20'
-                                  : 'border-border focus:border-primary focus:ring-primary/20'
+                                  ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/20'
+                                  : 'border-gray-200 focus:border-violet-500 focus:ring-violet-500/20 dark:border-white/20'
                             }`}
                           />
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
                           >
                             {showConfirmPassword ? (
                               <EyeOff className="h-4 w-4" />
@@ -350,7 +352,7 @@ export function AccountSecurityCard() {
                           </button>
                         </div>
                         {confirmPassword && !passwordsMatch && (
-                          <p className="text-xs text-destructive">
+                          <p className="text-xs text-red-600 dark:text-red-400">
                             Las contrasenas no coinciden
                           </p>
                         )}
@@ -361,23 +363,23 @@ export function AccountSecurityCard() {
                       <Button
                         variant="outline"
                         onClick={() => toggleSection(null)}
+                        className="border-gray-200 bg-white text-black hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/10"
                       >
                         Cancelar
                       </Button>
                       <Button
-                        variant="primary"
                         onClick={handleChangePassword}
-                        loading={passwordLoading}
                         disabled={
+                          passwordLoading ||
                           !currentPassword ||
                           !newPassword ||
                           !confirmPassword ||
                           !passwordsMatch ||
                           passwordOtp.length !== 6
                         }
-                        className="bg-primary-blue hover:bg-primary-blue/90"
+                        className="bg-violet-600 text-white hover:bg-violet-700"
                       >
-                        Guardar Cambios
+                        {passwordLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Guardar Cambios'}
                       </Button>
                     </div>
                   </>
@@ -393,21 +395,21 @@ export function AccountSecurityCard() {
         <button
           type="button"
           onClick={() => toggleSection('email')}
-          className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-muted/50 sm:p-6"
+          className="flex w-full items-center justify-between gap-2 p-4 text-left transition-colors hover:bg-gray-50 sm:p-6 dark:hover:bg-white/5"
         >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-600">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600 sm:h-10 sm:w-10 dark:bg-cyan-500/10 dark:text-cyan-400">
               <Mail className="h-4 w-4" />
             </div>
-            <div>
-              <p className="font-medium text-foreground">Cambiar Correo Electronico</p>
-              <p className="text-sm text-muted-foreground">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-black sm:text-base dark:text-white">Cambiar Correo Electronico</p>
+              <p className="truncate text-xs text-gray-500 sm:text-sm dark:text-gray-400">
                 Actualiza tu direccion de email
               </p>
             </div>
           </div>
           <ChevronDown
-            className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${
+            className={`h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 dark:text-gray-500 ${
               expandedSection === 'email' ? 'rotate-180' : ''
             }`}
           />
@@ -422,20 +424,20 @@ export function AccountSecurityCard() {
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
-              <div className="space-y-5 border-t border-border bg-muted/30 p-5 sm:p-6">
+              <div className="space-y-5 border-t border-gray-200 bg-gray-50 p-5 sm:p-6 dark:border-white/10 dark:bg-black/30">
                 {emailSuccess ? (
                   <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="flex flex-col items-center gap-3 py-6 text-center"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
                       <CheckCircle2 className="h-7 w-7" />
                     </div>
-                    <p className="text-lg font-medium text-foreground">
+                    <p className="text-lg font-medium text-black dark:text-white">
                       Correo actualizado
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Tu direccion de correo ha sido cambiada exitosamente.
                     </p>
                   </motion.div>
@@ -443,7 +445,7 @@ export function AccountSecurityCard() {
                   <>
                     {/* Step 1: Enter new email */}
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">
+                      <label className="text-sm font-medium text-black dark:text-white">
                         Nuevo Correo Electronico
                       </label>
                       <input
@@ -451,14 +453,14 @@ export function AccountSecurityCard() {
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
                         placeholder="nuevo@email.com"
-                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-black placeholder:text-gray-400 transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/20 dark:bg-black dark:text-white dark:placeholder:text-gray-500"
                       />
                     </div>
 
-                    <div className="rounded-xl border border-border bg-background p-4">
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-black/50">
                       <div className="flex items-start gap-3">
-                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                        <p className="text-sm text-muted-foreground">
+                        <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           Enviaremos un codigo de verificacion a tu correo actual para
                           confirmar este cambio.
                         </p>
@@ -467,19 +469,18 @@ export function AccountSecurityCard() {
 
                     <div className="flex gap-3">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => toggleSection(null)}
+                        className="border-gray-200 bg-white text-black hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/10"
                       >
                         Cancelar
                       </Button>
                       <Button
-                        variant="primary"
                         onClick={handleSendEmailOtp}
-                        loading={emailLoading}
-                        disabled={!newEmail}
-                        className="bg-primary-blue hover:bg-primary-blue/90"
+                        disabled={!newEmail || emailLoading}
+                        className="bg-violet-600 text-white hover:bg-violet-700"
                       >
-                        Enviar Codigo
+                        {emailLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Enviar Codigo'}
                       </Button>
                     </div>
                   </>
@@ -487,41 +488,43 @@ export function AccountSecurityCard() {
                   <>
                     {/* Step 2: Verify with OTP */}
                     <div className="space-y-4">
-                      <div className="rounded-xl border border-success/30 bg-success/5 p-4">
-                        <p className="text-sm text-foreground">
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/5">
+                        <p className="text-sm text-emerald-800 dark:text-emerald-300">
                           Codigo enviado a tu correo actual. Ingresa el codigo de
                           6 digitos para confirmar el cambio.
                         </p>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground">
+                        <label className="text-sm font-medium text-black dark:text-white">
                           Codigo de verificacion
                         </label>
-                        <div className="flex justify-center py-2">
-                          <InputOTP
-                            maxLength={6}
-                            value={emailOtp}
-                            onChange={setEmailOtp}
-                          >
-                            <InputOTPGroup>
-                              <InputOTPSlot index={0} />
-                              <InputOTPSlot index={1} />
-                              <InputOTPSlot index={2} />
-                            </InputOTPGroup>
-                            <InputOTPSeparator />
-                            <InputOTPGroup>
-                              <InputOTPSlot index={3} />
-                              <InputOTPSlot index={4} />
-                              <InputOTPSlot index={5} />
-                            </InputOTPGroup>
-                          </InputOTP>
+                        <div className="flex justify-center overflow-x-auto py-2">
+                          <div className="scale-90 sm:scale-100">
+                            <InputOTP
+                              maxLength={6}
+                              value={emailOtp}
+                              onChange={setEmailOtp}
+                            >
+                              <InputOTPGroup>
+                                <InputOTPSlot index={0} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                                <InputOTPSlot index={1} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                                <InputOTPSlot index={2} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                              </InputOTPGroup>
+                              <InputOTPSeparator />
+                              <InputOTPGroup>
+                                <InputOTPSlot index={3} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                                <InputOTPSlot index={4} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                                <InputOTPSlot index={5} className="border-gray-200 dark:border-white/20 dark:bg-black" />
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="rounded-xl border border-border bg-background p-4">
-                        <p className="text-sm text-muted-foreground">
-                          <span className="font-medium text-foreground">
+                      <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-black/50">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <span className="font-medium text-black dark:text-white">
                             Nuevo correo:
                           </span>{' '}
                           {newEmail}
@@ -533,17 +536,16 @@ export function AccountSecurityCard() {
                       <Button
                         variant="outline"
                         onClick={() => toggleSection(null)}
+                        className="border-gray-200 bg-white text-black hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/10"
                       >
                         Cancelar
                       </Button>
                       <Button
-                        variant="primary"
                         onClick={handleChangeEmail}
-                        loading={emailLoading}
-                        disabled={emailOtp.length !== 6}
-                        className="bg-primary-blue hover:bg-primary-blue/90"
+                        disabled={emailOtp.length !== 6 || emailLoading}
+                        className="bg-violet-600 text-white hover:bg-violet-700"
                       >
-                        Verificar y Guardar
+                        {emailLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verificar y Guardar'}
                       </Button>
                     </div>
                   </>

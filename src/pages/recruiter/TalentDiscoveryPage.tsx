@@ -84,31 +84,31 @@ function normalizeText(value: string) {
     .trim();
 }
 
-// Skeleton loading component with lilac pulses
+// Skeleton loading component
 function TalentCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-violet-500/20 bg-black/60 p-5">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-950">
       <div className="flex items-start gap-4">
-        <div className="h-16 w-16 animate-pulse rounded-2xl bg-violet-500/10" />
+        <div className="h-16 w-16 animate-pulse rounded-2xl bg-gray-200 dark:bg-white/10" />
         <div className="flex-1 space-y-3">
-          <div className="h-5 w-3/4 animate-pulse rounded-lg bg-violet-500/10" />
-          <div className="h-4 w-1/2 animate-pulse rounded-lg bg-violet-500/10" />
+          <div className="h-5 w-3/4 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
+          <div className="h-4 w-1/2 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
         </div>
       </div>
       <div className="mt-4 flex gap-2">
-        <div className="h-6 w-20 animate-pulse rounded-full bg-violet-500/10" />
-        <div className="h-6 w-24 animate-pulse rounded-full bg-violet-500/10" />
-        <div className="h-6 w-16 animate-pulse rounded-full bg-violet-500/10" />
+        <div className="h-6 w-20 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
+        <div className="h-6 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
+        <div className="h-6 w-16 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
       </div>
       <div className="mt-4 space-y-2">
-        <div className="h-3 w-full animate-pulse rounded bg-violet-500/10" />
-        <div className="h-3 w-4/5 animate-pulse rounded bg-violet-500/10" />
+        <div className="h-3 w-full animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+        <div className="h-3 w-4/5 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
       </div>
     </div>
   );
 }
 
-// Talent Card Component with WOW Factor
+// Talent Card Component
 function TalentCard({ 
   candidate, 
   index,
@@ -125,7 +125,6 @@ function TalentCard({
     .filter((skill) => skill.isTop)
     .slice(0, 3);
   
-  // Determine seniority based on top skill level
   const seniority = candidate.hardSkills.find(s => s.isTop)?.level || 'Mid';
 
   return (
@@ -136,8 +135,8 @@ function TalentCard({
       whileHover={{ scale: 1.02 }}
       className="group relative"
     >
-      <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-violet-600/0 to-purple-600/0 opacity-0 blur transition-all duration-300 group-hover:from-violet-600/50 group-hover:to-purple-600/50 group-hover:opacity-100" />
-      <Card className="relative h-full rounded-2xl border border-violet-500/20 bg-black/80 p-0 transition-all duration-300 hover:border-violet-500/50 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)]">
+      <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-violet-600/0 to-purple-600/0 opacity-0 blur transition-all duration-300 group-hover:from-violet-600/20 group-hover:to-purple-600/20 group-hover:opacity-100" />
+      <Card className="relative h-full rounded-2xl border border-gray-200 bg-white p-0 transition-all duration-300 hover:border-violet-500/50 hover:shadow-lg dark:border-white/10 dark:bg-zinc-950 dark:hover:border-violet-500/50">
         <CardContent className="p-5">
           {/* Header with Avatar and Name */}
           <div className="flex items-start justify-between gap-4">
@@ -147,16 +146,16 @@ function TalentCard({
                 alt={candidate.user.name}
                 fallback={candidate.user.name}
                 size="xl"
-                className="rounded-2xl border-2 border-violet-500/30 shadow-lg shadow-violet-500/10"
+                className="rounded-2xl border-2 border-gray-100 shadow-sm dark:border-white/10 dark:shadow-none"
               />
               <div className="min-w-0 flex-1">
-                <h3 className="truncate font-sans text-lg font-bold text-white">
+                <h3 className="truncate font-sans text-lg font-bold text-black dark:text-white">
                   {candidate.user.name}
                 </h3>
-                <p className="truncate font-sans text-sm font-medium text-violet-400">
+                <p className="truncate font-sans text-sm font-medium text-violet-600 dark:text-violet-400">
                   {candidate.expectedRole}
                 </p>
-                <div className="mt-2 flex items-center gap-2 text-xs text-violet-300/60">
+                <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                   <MapPin className="h-3 w-3" />
                   <span>{candidate.user.location}</span>
                 </div>
@@ -164,7 +163,7 @@ function TalentCard({
             </div>
             
             {/* Seniority Badge */}
-            <Badge className="shrink-0 border-0 bg-gradient-to-r from-violet-600 to-purple-600 font-sans text-xs font-semibold text-white shadow-lg shadow-violet-500/25">
+            <Badge className="shrink-0 border-0 bg-gradient-to-r from-violet-600 to-purple-600 font-sans text-xs font-semibold text-white shadow-md">
               {seniority}
             </Badge>
           </div>
@@ -174,34 +173,34 @@ function TalentCard({
             {topSkills.map((skill) => (
               <div
                 key={skill.name}
-                className="flex items-center gap-1.5 rounded-lg border border-violet-500/20 bg-violet-500/10 px-2.5 py-1.5 transition-colors hover:border-violet-500/40"
+                className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 transition-colors hover:border-violet-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-violet-500/40"
               >
-                <Zap className="h-3 w-3 text-violet-400" />
-                <span className="font-sans text-xs font-medium text-violet-300">{skill.name}</span>
+                <Zap className="h-3 w-3 text-violet-500 dark:text-violet-400" />
+                <span className="font-sans text-xs font-medium text-gray-700 dark:text-gray-300">{skill.name}</span>
               </div>
             ))}
           </div>
 
           {/* Quick Preview Bio */}
-          <p className="mt-4 line-clamp-2 font-sans text-sm leading-relaxed text-violet-300/70">
+          <p className="mt-4 line-clamp-2 font-sans text-sm leading-relaxed text-gray-600 dark:text-gray-400">
             {candidate.summary}
           </p>
 
           {/* Context Tags */}
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
-            <Badge variant="outline" className="border-violet-500/20 bg-transparent text-violet-300/60">
+            <Badge variant="outline" className="border-gray-200 bg-transparent text-gray-600 dark:border-white/10 dark:text-gray-400">
               {candidate.experienceYears}+ anos
             </Badge>
-            <Badge variant="outline" className="border-violet-500/20 bg-transparent text-violet-300/60">
+            <Badge variant="outline" className="border-gray-200 bg-transparent text-gray-600 dark:border-white/10 dark:text-gray-400">
               {candidate.workMode}
             </Badge>
             <Badge 
               className={`border-0 ${
                 candidate.availability === 'Disponible' 
-                  ? 'bg-emerald-500/20 text-emerald-400' 
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' 
                   : candidate.availability === 'Entrevistas'
-                  ? 'bg-amber-500/20 text-amber-400'
-                  : 'bg-violet-500/20 text-violet-400'
+                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'
+                  : 'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400'
               }`}
             >
               {candidate.availability}
@@ -212,7 +211,7 @@ function TalentCard({
           <div className="mt-5 flex items-center gap-2">
             <Button
               onClick={() => navigate(`/p/${candidate.user.slug}`)}
-              className="flex-1 rounded-xl border-0 bg-gradient-to-r from-violet-600 to-purple-600 font-sans text-sm font-medium text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40"
+              className="flex-1 rounded-xl border-0 bg-gradient-to-r from-violet-600 to-purple-600 font-sans text-sm font-medium text-white shadow-md transition-all hover:shadow-lg"
             >
               <ExternalLink className="mr-2 h-4 w-4" />
               Ver Perfil Completo
@@ -221,8 +220,8 @@ function TalentCard({
               onClick={() => onSaveFavorite(candidate.user.id)}
               className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-all ${
                 isFavorite
-                  ? 'border-pink-500/50 bg-pink-500/20 text-pink-400'
-                  : 'border-violet-500/20 bg-violet-500/10 text-violet-400 hover:border-violet-500/40'
+                  ? 'border-pink-200 bg-pink-50 text-pink-600 dark:border-pink-500/50 dark:bg-pink-500/20 dark:text-pink-400'
+                  : 'border-gray-200 bg-gray-50 text-gray-400 hover:text-red-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-500 dark:hover:text-red-400'
               }`}
               aria-label={isFavorite ? 'Quitar de favoritos' : 'Guardar en favoritos'}
             >
@@ -275,7 +274,6 @@ export default function TalentDiscoveryPage() {
     return recruiterTalentProfiles.filter((candidate) => {
       const normalizedQuery = normalizeText(searchQuery);
       
-      // Text search
       if (normalizedQuery) {
         const searchableText = normalizeText(
           [
@@ -294,13 +292,11 @@ export default function TalentDiscoveryPage() {
         }
       }
 
-      // Seniority filter
       if (seniority) {
         const hasSeniority = candidate.hardSkills.some(skill => skill.level === seniority);
         if (!hasSeniority) return false;
       }
 
-      // Skill category filter
       if (skillCategory) {
         const hasCategory = candidate.hardSkills.some(skill => 
           normalizeText(skill.category).includes(normalizeText(skillCategory))
@@ -308,7 +304,6 @@ export default function TalentDiscoveryPage() {
         if (!hasCategory) return false;
       }
 
-      // Location filter (map to workMode)
       if (location) {
         const workModeMap: Record<LocationType, string> = {
           'Remote': 'Remoto',
@@ -322,7 +317,6 @@ export default function TalentDiscoveryPage() {
     });
   }, [searchQuery, seniority, role, skillCategory, location]);
 
-  // Simulate loading
   useEffect(() => {
     setIsLoading(true);
     const timeout = setTimeout(() => setIsLoading(false), 400);
@@ -360,7 +354,7 @@ export default function TalentDiscoveryPage() {
   const activeFilterCount = [seniority, role, skillCategory, location].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       {/* Command+K Search Modal */}
       <AnimatePresence>
         {showCommandSearch && (
@@ -369,32 +363,32 @@ export default function TalentDiscoveryPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm dark:bg-black/80"
               onClick={() => setShowCommandSearch(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              className="fixed left-1/2 top-1/4 z-50 w-full max-w-2xl -translate-x-1/2 rounded-2xl border border-violet-500/30 bg-black/95 p-2 shadow-2xl shadow-violet-500/20"
+              className="fixed left-1/2 top-1/4 z-50 w-full max-w-2xl -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-2 shadow-2xl dark:border-white/10 dark:bg-zinc-950"
             >
-              <div className="flex items-center gap-3 border-b border-violet-500/20 px-4 pb-3 pt-2">
-                <Search className="h-5 w-5 text-violet-400" />
+              <div className="flex items-center gap-3 border-b border-gray-100 px-4 pb-3 pt-2 dark:border-white/10">
+                <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   value={searchDraft}
                   onChange={(e) => setSearchDraft(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="Buscar talento por skill, rol, nombre..."
-                  className="flex-1 bg-transparent font-sans text-lg text-white placeholder:text-violet-300/40 focus:outline-none"
+                  className="flex-1 bg-transparent font-sans text-lg text-black placeholder:text-gray-400 focus:outline-none dark:text-white dark:placeholder:text-gray-500"
                   autoFocus
                 />
-                <kbd className="rounded-lg border border-violet-500/30 bg-violet-500/10 px-2 py-1 font-sans text-xs text-violet-300">
+                <kbd className="rounded-lg border border-gray-200 bg-gray-100 px-2 py-1 font-sans text-xs text-gray-500 dark:border-white/10 dark:bg-white/10 dark:text-gray-400">
                   ESC
                 </kbd>
               </div>
               <div className="p-3">
-                <p className="mb-2 px-2 font-sans text-xs font-medium uppercase tracking-wider text-violet-300/50">
+                <p className="mb-2 px-2 font-sans text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                   Busquedas rapidas
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -402,7 +396,7 @@ export default function TalentDiscoveryPage() {
                     <button
                       key={term}
                       onClick={() => handleSearch(term)}
-                      className="rounded-lg border border-violet-500/20 bg-violet-500/10 px-3 py-1.5 font-sans text-sm text-violet-300 transition-colors hover:border-violet-500/40 hover:bg-violet-500/20"
+                      className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 font-sans text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
                     >
                       {term}
                     </button>
@@ -414,13 +408,13 @@ export default function TalentDiscoveryPage() {
         )}
       </AnimatePresence>
 
-      {/* Header with Logo */}
-      <header className="sticky top-0 z-40 border-b border-violet-500/20 bg-black/95 backdrop-blur-xl">
+      {/* Header with Logo - Z-INDEX 10 PARA QUE NO TAPE EL MENÚ DEL LAYOUT */}
+      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/95">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4">
             <EthosCoreLogo size="sm" variant="lilac" />
-            <div className="hidden h-6 w-px bg-violet-500/30 md:block" />
-            <h1 className="hidden font-sans text-lg font-semibold text-white md:block">
+            <div className="hidden h-6 w-px bg-gray-200 md:block dark:bg-white/10" />
+            <h1 className="hidden font-sans text-lg font-semibold text-black md:block dark:text-white">
               Talent Discovery
             </h1>
           </div>
@@ -428,18 +422,18 @@ export default function TalentDiscoveryPage() {
           {/* Command + K Search Bar */}
           <button
             onClick={() => setShowCommandSearch(true)}
-            className="flex items-center gap-3 rounded-xl border border-violet-500/30 bg-violet-500/10 px-4 py-2 transition-all hover:border-violet-500/50 hover:bg-violet-500/20"
+            className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 transition-all hover:bg-gray-100 dark:border-white/10 dark:bg-black/50 dark:hover:bg-white/5"
           >
-            <Search className="h-4 w-4 text-violet-400" />
-            <span className="font-sans text-sm text-violet-300/70">Buscar talento...</span>
-            <kbd className="ml-8 flex items-center gap-1 rounded-md border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 font-sans text-xs text-violet-300">
+            <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+            <span className="font-sans text-sm text-gray-500 dark:text-gray-400">Buscar talento...</span>
+            <kbd className="ml-8 flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-0.5 font-sans text-xs text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
               <Command className="h-3 w-3" />
               K
             </kbd>
           </button>
 
           <div className="flex items-center gap-2">
-            <Badge className="border-0 bg-violet-500/20 font-sans text-xs text-violet-300">
+            <Badge className="border-0 bg-violet-100 font-sans text-xs text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
               {filteredCandidates.length} talentos
             </Badge>
           </div>
@@ -457,14 +451,14 @@ export default function TalentDiscoveryPage() {
                 exit={{ opacity: 0, x: -20, width: 0 }}
                 className="hidden shrink-0 lg:block"
               >
-                <div className="sticky top-24 rounded-2xl border border-violet-500/20 bg-black/60 p-5">
+                <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-950">
                   <div className="mb-5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4 text-violet-400" />
-                      <h2 className="font-sans text-sm font-semibold text-white">Filtros</h2>
+                      <Filter className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                      <h2 className="font-sans text-sm font-semibold text-black dark:text-white">Filtros</h2>
                     </div>
                     {activeFilterCount > 0 && (
-                      <Badge className="border-0 bg-violet-500/20 text-xs text-violet-300">
+                      <Badge className="border-0 bg-violet-100 text-xs text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
                         {activeFilterCount} activos
                       </Badge>
                     )}
@@ -473,16 +467,16 @@ export default function TalentDiscoveryPage() {
                   <div className="space-y-5">
                     {/* Seniority Filter */}
                     <div>
-                      <label className="mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-violet-300/60">
+                      <label className="mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         Seniority
                       </label>
                       <select
                         value={seniority}
                         onChange={(e) => setSeniority(e.target.value as SeniorityLevel | '')}
-                        className="w-full rounded-xl border border-violet-500/20 bg-violet-500/10 px-3 py-2.5 font-sans text-sm text-violet-200 transition-colors hover:border-violet-500/40 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/50"
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 font-sans text-sm text-black transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-violet-500"
                       >
                         {seniorityOptions.map(opt => (
-                          <option key={opt.value} value={opt.value} className="bg-black text-white">
+                          <option key={opt.value} value={opt.value}>
                             {opt.label}
                           </option>
                         ))}
@@ -491,16 +485,16 @@ export default function TalentDiscoveryPage() {
 
                     {/* Role Filter */}
                     <div>
-                      <label className="mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-violet-300/60">
+                      <label className="mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         Tipo de Rol
                       </label>
                       <select
                         value={role}
                         onChange={(e) => setRole(e.target.value as RoleType | '')}
-                        className="w-full rounded-xl border border-violet-500/20 bg-violet-500/10 px-3 py-2.5 font-sans text-sm text-violet-200 transition-colors hover:border-violet-500/40 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/50"
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 font-sans text-sm text-black transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-violet-500"
                       >
                         {roleOptions.map(opt => (
-                          <option key={opt.value} value={opt.value} className="bg-black text-white">
+                          <option key={opt.value} value={opt.value}>
                             {opt.label}
                           </option>
                         ))}
@@ -509,16 +503,16 @@ export default function TalentDiscoveryPage() {
 
                     {/* Skill Category Filter */}
                     <div>
-                      <label className="mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-violet-300/60">
+                      <label className="mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         Categoria de Skills
                       </label>
                       <select
                         value={skillCategory}
                         onChange={(e) => setSkillCategory(e.target.value as SkillCategory | '')}
-                        className="w-full rounded-xl border border-violet-500/20 bg-violet-500/10 px-3 py-2.5 font-sans text-sm text-violet-200 transition-colors hover:border-violet-500/40 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/50"
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 font-sans text-sm text-black transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-violet-500"
                       >
                         {skillCategories.map(opt => (
-                          <option key={opt.value} value={opt.value} className="bg-black text-white">
+                          <option key={opt.value} value={opt.value}>
                             {opt.label}
                           </option>
                         ))}
@@ -527,16 +521,16 @@ export default function TalentDiscoveryPage() {
 
                     {/* Location Filter */}
                     <div>
-                      <label className="mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-violet-300/60">
+                      <label className="mb-2 block font-sans text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                         Ubicacion
                       </label>
                       <select
                         value={location}
                         onChange={(e) => setLocation(e.target.value as LocationType | '')}
-                        className="w-full rounded-xl border border-violet-500/20 bg-violet-500/10 px-3 py-2.5 font-sans text-sm text-violet-200 transition-colors hover:border-violet-500/40 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/50"
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 font-sans text-sm text-black transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-violet-500"
                       >
                         {locationOptions.map(opt => (
-                          <option key={opt.value} value={opt.value} className="bg-black text-white">
+                          <option key={opt.value} value={opt.value}>
                             {opt.label}
                           </option>
                         ))}
@@ -547,20 +541,20 @@ export default function TalentDiscoveryPage() {
                     <Button
                       variant="outline"
                       onClick={clearFilters}
-                      className="w-full rounded-xl border-violet-500/30 bg-transparent font-sans text-sm text-violet-300 hover:border-violet-500/50 hover:bg-violet-500/10"
+                      className="w-full rounded-xl border-gray-200 bg-white font-sans text-sm text-black hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
                     >
                       Limpiar filtros
                     </Button>
                   </div>
 
                   {/* Pro Tip */}
-                  <div className="mt-6 rounded-xl border border-violet-500/10 bg-violet-500/5 p-4">
+                  <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-white/5">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-violet-400" />
-                      <p className="font-sans text-xs font-semibold text-violet-300">Tip de busqueda</p>
+                      <Sparkles className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                      <p className="font-sans text-xs font-semibold text-black dark:text-white">Tip de busqueda</p>
                     </div>
-                    <p className="mt-2 font-sans text-xs leading-relaxed text-violet-300/60">
-                      Usa <kbd className="rounded bg-violet-500/20 px-1.5 py-0.5 text-violet-300">Cmd+K</kbd> para 
+                    <p className="mt-2 font-sans text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                      Usa <kbd className="rounded bg-gray-200 px-1.5 py-0.5 text-gray-600 dark:bg-white/20 dark:text-gray-300">Cmd+K</kbd> para 
                       busqueda rapida o combina filtros para resultados precisos.
                     </p>
                   </div>
@@ -575,34 +569,34 @@ export default function TalentDiscoveryPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-violet-500/20 bg-black/60 p-4"
+              className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-zinc-950"
             >
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2 rounded-xl border border-violet-500/20 bg-violet-500/10 px-3 py-2 font-sans text-sm text-violet-300 transition-colors hover:border-violet-500/40 lg:hidden"
+                  className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 font-sans text-sm text-black transition-colors hover:bg-gray-100 lg:hidden dark:border-white/10 dark:bg-black/50 dark:text-white dark:hover:bg-white/5"
                 >
                   <Filter className="h-4 w-4" />
                   Filtros
                 </button>
                 <div>
-                  <h2 className="font-sans text-lg font-semibold text-white">
+                  <h2 className="font-sans text-lg font-semibold text-black dark:text-white">
                     {searchQuery ? `Resultados para "${searchQuery}"` : 'Explorar Talento'}
                   </h2>
-                  <p className="font-sans text-sm text-violet-300/60">
+                  <p className="font-sans text-sm text-gray-500 dark:text-gray-400">
                     {isLoading ? 'Buscando...' : `${filteredCandidates.length} profesionales encontrados`}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 rounded-xl border border-violet-500/20 bg-violet-500/10 px-3 py-2">
-                  <Users className="h-4 w-4 text-violet-400" />
-                  <span className="font-sans text-sm text-violet-300">{recruiterTalentProfiles.length} total</span>
+                <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                  <Users className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                  <span className="font-sans text-sm text-black dark:text-white">{recruiterTalentProfiles.length} total</span>
                 </div>
-                <div className="flex items-center gap-2 rounded-xl border border-pink-500/20 bg-pink-500/10 px-3 py-2">
-                  <Heart className="h-4 w-4 text-pink-400" />
-                  <span className="font-sans text-sm text-pink-300">{favorites.size} guardados</span>
+                <div className="flex items-center gap-2 rounded-xl border border-pink-200 bg-pink-50 px-3 py-2 dark:border-pink-500/20 dark:bg-pink-500/10">
+                  <Heart className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                  <span className="font-sans text-sm text-pink-700 dark:text-pink-300">{favorites.size} guardados</span>
                 </div>
               </div>
             </motion.div>
@@ -615,7 +609,7 @@ export default function TalentDiscoveryPage() {
                 ))}
               </div>
             ) : filteredCandidates.length === 0 ? (
-              <div className="rounded-2xl border border-violet-500/20 bg-black/60 p-12">
+              <div className="rounded-2xl border border-gray-200 bg-white p-12 dark:border-white/10 dark:bg-zinc-950">
                 <EmptyState
                   icon={Briefcase}
                   title="No se encontraron candidatos"
