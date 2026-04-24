@@ -34,6 +34,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const shouldStartSkillOnboarding = (emailValue: string) => {
+    const normalizedEmail = emailValue.toLowerCase().trim();
+    const onboardingKey = `ethoshub_skills_onboarding_completed_${normalizedEmail}`;
+    return localStorage.getItem(onboardingKey) !== 'true';
+  };
+
   useEffect(() => {
     if (!prefills) {
       return;
@@ -56,6 +62,13 @@ export default function LoginPage() {
         description: 'Has iniciado sesion correctamente',
         duration: 4000,
       });
+
+      if (result.user.role === 'professional' && shouldStartSkillOnboarding(result.user.email)) {
+        navigate('/dashboard/skills?onboarding=1');
+        return;
+      }
+
+      // Navigate to role-specific path
       navigate(result.redirectPath);
     } else {
       toast.error('No se pudo iniciar sesion', {

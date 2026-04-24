@@ -171,7 +171,9 @@ export default function DashboardHomePage() {
     return () => clearTimeout(timer);
   }, [user, fetchHardSkills, fetchProjects]);
 
-  const topSkills = hardSkills.filter((s) => s.isTop);
+  const topSkills = hardSkills
+    .filter((s) => s.isTop)
+    .sort((left, right) => (left.topOrder ?? Number.MAX_SAFE_INTEGER) - (right.topOrder ?? Number.MAX_SAFE_INTEGER));
   const profileCompletion = calculateProfileCompletion(user, hardSkills.length, projects.length);
 
   const feedTabs = [

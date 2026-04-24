@@ -15,7 +15,8 @@ interface SkillsStore {
   addHardSkill: (userId: string, tagId: string, level: SkillLevel) => Promise<void>;
   createTag: (name: string, category: string) => Promise<GlobalSkillTag>;
   removeHardSkill: (skillId: string) => Promise<void>;
-  toggleTopSkill: (skillId: string) => Promise<void>;
+  toggleTopSkill: (userId: string, skillId: string) => Promise<void>;
+  reorderTopSkills: (userId: string, skillIds: string[]) => Promise<void>;
   toggleEndorsement: (skillId: string, endorserId: string, endorserName: string, endorserAvatar: string) => Promise<void>;
   addSoftSkill: (userId: string, title: string, description?: string) => Promise<void>;
   updateSoftSkill: (skillId: string, title: string, description?: string) => Promise<void>;
@@ -96,14 +97,19 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
     }
   },
 
-  toggleTopSkill: async (skillId: string) => {
+  toggleTopSkill: async (userId: string, skillId: string) => {
     try {
-      const updatedSkill = await skillsService.toggleTopSkill(skillId);
-      set((state) => ({
-        hardSkills: state.hardSkills.map((s) =>
-          s.id === skillId ? updatedSkill : s
-        ),
-      }));
+      await skillsService.toggleTopSkill(skillId);
+      void userId;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  reorderTopSkills: async (userId: string, skillIds: string[]) => {
+    try {
+      const hardSkills = await skillsService.reorderTopSkills(userId, skillIds);
+      set({ hardSkills });
     } catch (error) {
       throw error;
     }

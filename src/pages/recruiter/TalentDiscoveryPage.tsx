@@ -123,6 +123,7 @@ function TalentCard({
   const navigate = useNavigate();
   const topSkills = candidate.hardSkills
     .filter((skill) => skill.isTop)
+    .sort((left, right) => (left.topOrder ?? Number.MAX_SAFE_INTEGER) - (right.topOrder ?? Number.MAX_SAFE_INTEGER))
     .slice(0, 3);
   
   const seniority = candidate.hardSkills.find(s => s.isTop)?.level || 'Mid';
