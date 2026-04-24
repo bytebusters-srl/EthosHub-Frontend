@@ -1,12 +1,101 @@
 import type { User, UserRole } from '@/shared/types';
 
-// Mock credentials mapping
-const MOCK_CREDENTIALS: Record<string, { password: string; role: UserRole; name: string }> = {
-  'profesional@ethoshub.com': { password: 'demo', role: 'professional', name: 'Carlos Mendoza' },
-  'reclutador@ethoshub.com': { password: 'demo', role: 'recruiter', name: 'Ana Garcia' },
-  'admin@ethoshub.com': { password: 'demo', role: 'admin', name: 'Admin EthosHub' },
-  'demo@ethoshub.com': { password: 'demo123', role: 'professional', name: 'Demo User' },
+const API_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
+
+type ApiEnvelope<T> = {
+  success: boolean;
+  status: number;
+  message: string;
+  data?: T;
+  errors?: string[];
 };
+
+type BackendAuthUser = {
+  id: string;
+  username: string;
+  email: string;
+  userType: string;
+};
+
+type BackendAuthResponse = {
+  action: string;
+  token: string;
+  tokenType: string;
+  expiresIn: number;
+  user: BackendAuthUser;
+};
+
+type LoginApiResult = {
+  user: User;
+  token: string;
+  tokenType: string;
+  expiresIn: number;
+};
+
+type RegisterRole = 'PROFESSIONAL' | 'RECRUITER';
+
+function mapRoleToBackend(role: UserRole): RegisterRole {
+  return role === 'recruiter' ? 'RECRUITER' : 'PROFESSIONAL';
+}
+
+function mapUserTypeToRole(userType?: string): UserRole {
+  const normalized = (userType || '').toUpperCase();
+  if (normalized === 'RECLUTADOR' || normalized === 'RECRUITER') {
+    return 'recruiter';
+  }
+  if (normalized === 'ADMINISTRADOR' || normalized === 'ADMIN') {
+    return 'admin';
+  }
+  return 'professional';
+}
+
+function sanitizeSlug(value: string): string {
+  const base = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return base || `usuario-${Date.now()}`;
+}
+
+function buildUserFromAuth(authUser: BackendAuthUser): User {
+  const role = mapUserTypeToRole(authUser.userType);
+
+  return {
+    id: String(authUser.id),
+    email: authUser.email,
+    name: authUser.username,
+    username: authUser.username,
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authUser.email || authUser.username)}`,
+    role,
+    slug: sanitizeSlug(authUser.username),
+    profession: role === 'recruiter' ? 'Reclutador' : role === 'admin' ? 'Administrador' : 'Profesional',
+    bio: '',
+    headline: role === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
+    location: '',
+    website: '',
+    createdAt: new Date().toISOString(),
+  };
+}
+
+async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init.headers || {}),
+    },
+    ...init,
+  });
+
+  const payload = (await response.json()) as ApiEnvelope<T>;
+
+  if (!response.ok || !payload.success) {
+    const details = payload.errors?.[0] || payload.message || 'Error de autenticacion';
+    throw new Error(details);
+  }
+
+  if (!payload.data) {
+    throw new Error('Respuesta del servidor sin datos');
+  }
+
+  return payload.data;
+}
 
 // Role display names for toast messages
 export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
@@ -24,56 +113,31 @@ export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
   guest: '/',
 };
 
-/**
- * Authenticate user with mock credentials
- * Returns user object with correct role based on email/password combination
- */
-async function login(email: string, password: string, defaultRole: UserRole): Promise<User> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 800));
-
+async function login(email: string, password: string): Promise<LoginApiResult> {
   const normalizedEmail = email.toLowerCase().trim();
-  const mockUser = MOCK_CREDENTIALS[normalizedEmail];
+  const authResponse = await requestJson<BackendAuthResponse>('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ usernameOrEmail: normalizedEmail, password }),
+  });
 
-  // Check if credentials match a mock user
-  if (mockUser && mockUser.password === password) {
-    return {
-      id: `user-${Date.now()}`,
-      email: normalizedEmail,
-      name: mockUser.name,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${normalizedEmail}`,
-      role: mockUser.role,
-      slug: normalizedEmail.split('@')[0].replace(/[^a-z0-9]/g, '-'),
-      profession: mockUser.role === 'admin' 
-        ? 'Administrador del Sistema' 
-        : mockUser.role === 'recruiter' 
-          ? 'Reclutador de Talento Tech' 
-          : 'Desarrollador Full Stack',
-      bio: 'Usuario de demostración de EthosHub',
-      headline: mockUser.role === 'recruiter' 
-        ? 'Encontrando el mejor talento tech' 
-        : 'Construyendo el futuro digital',
-      location: 'Ciudad de México, México',
-      website: 'https://ethoshub.com',
-      company: mockUser.role === 'recruiter' ? 'TechRecruit Inc.' : undefined,
-      createdAt: new Date().toISOString(),
-    };
-  }
-
-  // For any other credentials, create a user with the provided/default role
   return {
-    id: `user-${Date.now()}`,
-    email: normalizedEmail,
-    name: normalizedEmail.split('@')[0],
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${normalizedEmail}`,
-    role: defaultRole,
-    slug: normalizedEmail.split('@')[0].replace(/[^a-z0-9]/g, '-'),
-    profession: defaultRole === 'recruiter' ? 'Reclutador' : 'Profesional',
-    bio: '',
-    location: '',
-    website: '',
-    createdAt: new Date().toISOString(),
+    user: buildUserFromAuth(authResponse.user),
+    token: authResponse.token,
+    tokenType: authResponse.tokenType,
+    expiresIn: authResponse.expiresIn,
   };
+}
+
+async function registerLocal(email: string, password: string, role: UserRole): Promise<void> {
+  const normalizedEmail = email.toLowerCase().trim();
+  await requestJson('/api/v1/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({
+      email: normalizedEmail,
+      password,
+      role: mapRoleToBackend(role),
+    }),
+  });
 }
 
 /**
@@ -109,9 +173,9 @@ async function logout(): Promise<void> {
 
 export const authService = {
   login,
+  registerLocal,
   updateProfile,
   logout,
-  MOCK_CREDENTIALS,
   ROLE_DISPLAY_NAMES,
   ROLE_REDIRECT_PATHS,
 };
