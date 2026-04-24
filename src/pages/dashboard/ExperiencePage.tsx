@@ -500,52 +500,56 @@ export default function ExperiencePage() {
         </aside>
       </div>
 
-      {/* Modal */}
+{/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <>
-            {/* Backdrop */}
+          // 1. Contenedor Flex de pantalla completa (reemplaza el top-1/2)
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            
+            {/* Backdrop con position absolute relativo al nuevo contenedor */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
               onClick={closeModal}
             />
 
-            {/* Modal */}
+            {/* Modal Container: max-h-full asegura que nunca exceda la pantalla */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 px-4"
+              className="relative flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl dark:bg-black"
             >
-              <div className="rounded-2xl border border-border bg-card shadow-2xl dark:bg-black">
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Briefcase className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-foreground">
-                        {isEditMode ? 'Editar Experiencia' : 'Nueva Experiencia'}
-                      </h2>
-                      <p className="text-xs text-muted-foreground">Experiencia laboral</p>
-                    </div>
+              {/* Header: shrink-0 para que se mantenga fijo arriba */}
+              <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Briefcase className="h-5 w-5" />
                   </div>
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">
+                      {isEditMode ? 'Editar Experiencia' : 'Nueva Experiencia'}
+                    </h2>
+                    <p className="text-xs text-muted-foreground">Experiencia laboral</p>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="max-h-[60vh] overflow-y-auto p-6">
+              {/* Formulario Flex que envuelve el scroll Y el footer */}
+              <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
+                
+                {/* Contenido scrolleable: flex-1 y overflow-y-auto */}
+                <div className="flex-1 overflow-y-auto p-6">
                   <div className="space-y-4">
                     {/* Company Name */}
                     <div className="space-y-2">
@@ -713,10 +717,10 @@ export default function ExperiencePage() {
                       </p>
                     </div>
                   </div>
-                </form>
+                </div>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between border-t border-border px-6 py-4">
+                {/* Footer: shrink-0 para que se mantenga fijo abajo */}
+                <div className="flex shrink-0 items-center justify-between border-t border-border bg-card px-6 py-4 dark:bg-black">
                   <div>
                     {isEditMode && !showDeleteConfirm && (
                       <Button
@@ -761,7 +765,6 @@ export default function ExperiencePage() {
                     <Button
                       type="submit"
                       variant="primary"
-                      onClick={handleSubmit}
                       disabled={isSaving}
                       className="gap-2 bg-primary hover:bg-primary/90"
                     >
@@ -770,9 +773,9 @@ export default function ExperiencePage() {
                     </Button>
                   </div>
                 </div>
-              </div>
+              </form>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </motion.section>

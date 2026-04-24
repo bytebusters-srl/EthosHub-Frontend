@@ -541,54 +541,57 @@ export default function EducationPage() {
         </aside>
       </div>
 
-      {/* Modal */}
+ {/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <>
+          // 1. Contenedor Flex de pantalla completa para centrado absoluto
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
               onClick={closeModal}
             />
 
-            {/* Modal */}
+            {/* Modal Container */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 px-4"
+              // Quitamos position absolute y translate, usamos max-h-full y flex-col
+              className="relative flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl dark:bg-black"
             >
-              <div className="rounded-2xl border border-border bg-card shadow-2xl dark:bg-black">
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-border px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600">
-                      <GraduationCap className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold text-foreground">
-                        {isEditMode ? 'Editar Trayectoria' : 'Nueva Trayectoria'}
-                      </h2>
-                      <p className="text-xs text-muted-foreground">
-                        Registro academico o certificacion
-                      </p>
-                    </div>
+              {/* Header (shrink-0 para que no se aplaste) */}
+              <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600">
+                    <GraduationCap className="h-5 w-5" />
                   </div>
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">
+                      {isEditMode ? 'Editar Trayectoria' : 'Nueva Trayectoria'}
+                    </h2>
+                    <p className="text-xs text-muted-foreground">
+                      Registro academico o certificacion
+                    </p>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="max-h-[60vh] overflow-y-auto p-6">
+              {/* Formulario (flex-1 para rellenar espacio, overflow-y-auto para scroll interno) */}
+              <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto p-6">
                   <div className="space-y-4">
                     {/* Institution Name */}
                     <div className="space-y-2">
@@ -806,10 +809,10 @@ export default function EducationPage() {
                       {errors.file && <p className="text-xs text-destructive">{errors.file}</p>}
                     </div>
                   </div>
-                </form>
+                </div>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between border-t border-border px-6 py-4">
+                {/* Footer (shrink-0 para proteger los botones) */}
+                <div className="flex shrink-0 items-center justify-between border-t border-border bg-card px-6 py-4 dark:bg-black">
                   <div>
                     {isEditMode && (
                       <Button
@@ -837,9 +840,9 @@ export default function EducationPage() {
                     </Button>
                   </div>
                 </div>
-              </div>
+              </form>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </motion.section>

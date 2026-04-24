@@ -19,10 +19,8 @@ import {
   Globe,
   User,
   Search,
-  Users,
-  BarChart3,
   Shield,
-  FileText,
+  // Los íconos Users y BarChart3 se eliminaron de aquí porque ahora vivirán dentro de /admin
 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { useAuthStore, useUiStore, useNotificationsStore } from '@/store';
@@ -57,12 +55,11 @@ const recruiterNavItems: DashboardNavItem[] = [
   { path: '/dashboard/preferences', icon: Settings, labelKey: 'nav.preferences' },
 ];
 
-// Navigation items for Administrador users
+// 🚀 Navigation items for Administrador users (¡MODIFICADO!)
+// Solo dejamos las 3 opciones principales. Todo lo demás se gestiona DENTRO de /admin/dashboard
 const adminNavItems: DashboardNavItem[] = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Panel Principal' },
-  { path: '/admin/moderation', icon: Shield, label: 'Panel de Moderacion' },
-  { path: '/admin/metrics', icon: BarChart3, label: 'Metricas Globales' },
-  { path: '/admin/users', icon: Users, label: 'Gestion de Usuarios' },
+  { path: '/admin/dashboard', icon: Shield, label: 'Panel Admin' },
   { path: '/dashboard/preferences', icon: Settings, labelKey: 'nav.preferences' },
 ];
 
@@ -147,7 +144,8 @@ export function DashboardLayout() {
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
             {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              // Verificamos si la ruta actual coincide O si empieza con la ruta del item (para que se mantenga marcado al navegar dentro de admin)
+              const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
               return (
                 <li key={item.path}>
                   <Link
@@ -166,31 +164,6 @@ export function DashboardLayout() {
               );
             })}
           </ul>
-
-          {/* Admin link for professional/recruiter users who also have admin access */}
-          {user?.role === 'admin' && (
-            <div className="mt-6 border-t border-gray-200 pt-6 dark:border-white/10">
-              <p className="mb-2 px-3 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
-                {t('nav.admin')}
-              </p>
-              <ul className="space-y-1">
-                <li>
-                  <Link
-                    to="/admin/dashboard"
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                      location.pathname.startsWith('/admin')
-                        ? 'bg-violet-600 text-white shadow-md'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-black dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white'
-                    )}
-                  >
-                    <LayoutDashboard className="h-5 w-5" />
-                    Panel Admin
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          )}
         </nav>
 
         {/* User section */}
@@ -199,7 +172,7 @@ export function DashboardLayout() {
             <Avatar src={user?.avatar} alt={user?.name} fallback={user?.name} size="md" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-black dark:text-white">{user?.name}</p>
-              <p className="truncate text-xs text-gray-500 dark:text-gray-400">{user?.profession}</p>
+              <p className="truncate text-xs text-gray-500 dark:text-gray-400">{user?.role === 'admin' ? 'Administrador' : user?.profession}</p>
             </div>
           </div>
         </div>
