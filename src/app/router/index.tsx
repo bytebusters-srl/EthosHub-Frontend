@@ -175,6 +175,17 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+  // 🔥 AÑADIDO: ruta directa para ver talentos sin login
+  {
+    path: '/talent',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <TalentDiscoveryPage />
+      </Suspense>
+    ),
+  },
+
   {
     element: (
       <ProtectedRoute allowedRoles={['admin']}>
