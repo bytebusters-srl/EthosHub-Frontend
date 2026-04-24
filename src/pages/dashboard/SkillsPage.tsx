@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
@@ -8,6 +9,8 @@ import {
   Edit2,
   Search,
   Filter,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { useAuthStore, useSkillsStore, useUiStore } from '@/store';
 import {
@@ -45,6 +48,8 @@ const categories: SkillCategory[] = [
 
 export default function SkillsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
   const { addToast } = useUiStore();
   const {
@@ -59,6 +64,7 @@ export default function SkillsPage() {
     createTag,
     removeHardSkill,
     toggleTopSkill,
+    reorderTopSkills,
     addSoftSkill,
     updateSoftSkill,
     removeSoftSkill,
@@ -76,6 +82,7 @@ export default function SkillsPage() {
   const [softSkillDescription, setSoftSkillDescription] = useState('');
   const [editingSoftSkill, setEditingSoftSkill] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'hard' | 'soft'; id: string } | null>(null);
+  const onboardingMode = searchParams.get('onboarding') === '1';
 
   useEffect(() => {
     if (user) {
@@ -126,9 +133,36 @@ export default function SkillsPage() {
 
   const handleToggleTop = async (skillId: string) => {
     try {
-      await toggleTopSkill(skillId);
+      if (!user) return;
+      await toggleTopSkill(user.id, skillId);
+      await fetchHardSkills(user.id);
     } catch {
       addToast({ type: 'error', title: t('skills.maxTopSkills') });
+    }
+  };
+
+  const handleMoveTopSkill = async (skillId: string, direction: 'up' | 'down') => {
+    if (!user) return;
+
+    const orderedTopSkills = [...hardSkills]
+      .filter((skill) => skill.isTop)
+      .sort((left, right) => (left.topOrder ?? Number.MAX_SAFE_INTEGER) - (right.topOrder ?? Number.MAX_SAFE_INTEGER));
+
+    const currentIndex = orderedTopSkills.findIndex((skill) => skill.id === skillId);
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= orderedTopSkills.length) {
+      return;
+    }
+
+    const nextOrder = [...orderedTopSkills];
+    [nextOrder[currentIndex], nextOrder[targetIndex]] = [nextOrder[targetIndex], nextOrder[currentIndex]];
+
+    try {
+      await reorderTopSkills(user.id, nextOrder.map((skill) => skill.id));
+      await fetchHardSkills(user.id);
+    } catch {
+      addToast({ type: 'error', title: 'No se pudo reordenar las top skills' });
     }
   };
 
@@ -161,9 +195,11 @@ export default function SkillsPage() {
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
+    if (!user) return;
 
     if (deleteConfirm.type === 'hard') {
       await removeHardSkill(deleteConfirm.id);
+      await fetchHardSkills(user.id);
     } else {
       await removeSoftSkill(deleteConfirm.id);
     }
@@ -172,7 +208,19 @@ export default function SkillsPage() {
     setDeleteConfirm(null);
   };
 
+  const handleCompleteOnboarding = () => {
+    if (!user?.email) return;
+
+    const onboardingKey = `ethoshub_skills_onboarding_completed_${user.email.toLowerCase().trim()}`;
+    localStorage.setItem(onboardingKey, 'true');
+    addToast({ type: 'success', title: 'Perfil inicial completado' });
+    navigate('/dashboard', { replace: true });
+  };
+
   const topSkillsCount = hardSkills.filter((s) => s.isTop).length;
+  const orderedTopSkills = [...hardSkills]
+    .filter((s) => s.isTop)
+    .sort((left, right) => (left.topOrder ?? Number.MAX_SAFE_INTEGER) - (right.topOrder ?? Number.MAX_SAFE_INTEGER));
   const filteredSkills = filterCategory === 'all'
     ? hardSkills
     : hardSkills.filter((s) => s.skillTag.category === filterCategory);
@@ -207,6 +255,22 @@ export default function SkillsPage() {
         }
       />
 
+      {onboardingMode && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold text-foreground">Completa tu registro profesional</p>
+              <p className="text-sm text-muted-foreground">
+                Agrega tus Hard Skills, Soft Skills y marca tu stack inicial desde el catálogo global.
+              </p>
+            </div>
+            <Button onClick={handleCompleteOnboarding} className="shrink-0">
+              Finalizar registro inicial
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Top Skills Counter */}
       <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20">
         <CardContent className="flex items-center justify-between p-4">
@@ -222,6 +286,72 @@ export default function SkillsPage() {
           <Badge variant={topSkillsCount >= 3 ? 'warning' : 'secondary'} className="text-lg px-4 py-1">
             {topSkillsCount}/3
           </Badge>
+        </CardContent>
+      </Card>
+
+      <Card className="border-yellow-500/20 bg-yellow-50/60 dark:bg-yellow-950/10">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-medium text-foreground">Top 3 prioritarias</p>
+              <p className="text-sm text-muted-foreground">
+                Ordénalas para que el perfil destaque primero lo más fuerte.
+              </p>
+            </div>
+            <Badge variant={topSkillsCount >= 3 ? 'warning' : 'secondary'}>{topSkillsCount}/3</Badge>
+          </div>
+
+          {orderedTopSkills.length > 0 ? (
+            <div className="mt-4 space-y-2">
+              {orderedTopSkills.map((skill, index) => (
+                <div
+                  key={skill.id}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-yellow-500/20 bg-background/80 p-3"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500/15 text-sm font-semibold text-yellow-600">
+                      {index + 1}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-foreground">{skill.skillTag.name}</p>
+                      <p className="text-xs text-muted-foreground">{skill.level}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveTopSkill(skill.id, 'up')}
+                      disabled={index === 0}
+                      className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveTopSkill(skill.id, 'down')}
+                      disabled={index === orderedTopSkills.length - 1}
+                      className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleTop(skill.id)}
+                      className="rounded-lg p-2 text-yellow-600 transition-colors hover:bg-yellow-500/10"
+                      aria-label="Quitar de top"
+                    >
+                      <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4 rounded-2xl border border-dashed border-yellow-500/30 bg-background/60 p-4 text-sm text-muted-foreground">
+              Marca hasta 3 habilidades como top y ordénalas aquí.
+            </div>
+          )}
         </CardContent>
       </Card>
 

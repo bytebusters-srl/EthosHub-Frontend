@@ -51,6 +51,7 @@ export interface HardSkill {
   skillTag: GlobalSkillTag;
   level: SkillLevel;
   isTop: boolean;
+  topOrder?: number | null;
   endorsements: Endorsement[];
   createdAt: string;
 }

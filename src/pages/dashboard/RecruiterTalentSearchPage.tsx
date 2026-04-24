@@ -440,6 +440,7 @@ export default function RecruiterTalentSearchPage() {
                   const { hardMatches, softMatches } = getCandidateMatches(candidate, searchQuery, scope);
                   const topSkills = candidate.hardSkills
                     .filter((skill) => skill.isTop)
+                    .sort((left, right) => (left.topOrder ?? Number.MAX_SAFE_INTEGER) - (right.topOrder ?? Number.MAX_SAFE_INTEGER))
                     .slice(0, 3)
                     .map((skill) => skill.name);
                   const matchBadges = [
