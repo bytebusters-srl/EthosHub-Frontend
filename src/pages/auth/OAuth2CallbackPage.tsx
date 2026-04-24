@@ -1,0 +1,134 @@
+import { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store';
+import type { User, UserRole } from '@/shared/types';
+import { ROLE_REDIRECT_PATHS } from '@/shared/services/authService';
+
+type JwtPayload = {
+  userId?: string | number;
+  email?: string;
+  username?: string;
+  userType?: string;
+  exp?: number;
+};
+
+function base64UrlDecode(value: string): string {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padding = normalized.length % 4;
+  const withPadding = padding ? normalized + '='.repeat(4 - padding) : normalized;
+  return atob(withPadding);
+}
+
+function decodeJwtPayload(token: string): JwtPayload | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) {
+      return null;
+    }
+    const raw = base64UrlDecode(parts[1]);
+    return JSON.parse(raw) as JwtPayload;
+  } catch {
+    return null;
+  }
+}
+
+function mapUserTypeToRole(userType?: string): UserRole {
+  if (userType === 'RECLUTADOR') {
+    return 'recruiter';
+  }
+  if (userType === 'ADMINISTRADOR') {
+    return 'admin';
+  }
+  return 'professional';
+}
+
+function sanitizeSlug(value: string): string {
+  const base = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return base || `usuario-${Date.now()}`;
+}
+
+function buildUserFromToken(payload: JwtPayload): User {
+  const email = payload.email || '';
+  const username = payload.username || (email.includes('@') ? email.split('@')[0] : 'oauth-user');
+  const role = mapUserTypeToRole(payload.userType);
+
+  return {
+    id: String(payload.userId || `oauth-${Date.now()}`),
+    email,
+    name: username,
+    username,
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email || username)}`,
+    role,
+    slug: sanitizeSlug(username),
+    profession: role === 'recruiter' ? 'Reclutador' : role === 'admin' ? 'Administrador' : 'Profesional',
+    bio: '',
+    headline: role === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
+    location: '',
+    website: '',
+    createdAt: new Date().toISOString(),
+  };
+}
+
+export default function OAuth2CallbackPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const completeOAuthLogin = useAuthStore((state) => state.completeOAuthLogin);
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      toast.error('No se pudo iniciar con OAuth2', {
+        description: error,
+      });
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const token = searchParams.get('token');
+    const tokenType = searchParams.get('tokenType') || 'Bearer';
+    const expiresInValue = searchParams.get('expiresIn');
+    const action = searchParams.get('action');
+
+    if (!token) {
+      toast.error('Respuesta OAuth2 incompleta', {
+        description: 'No se recibio token de acceso.',
+      });
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const payload = decodeJwtPayload(token);
+    if (!payload) {
+      toast.error('Token OAuth2 invalido');
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const user = buildUserFromToken(payload);
+    const expiresIn = expiresInValue ? Number(expiresInValue) : undefined;
+
+    completeOAuthLogin({
+      user,
+      token,
+      tokenType,
+      expiresIn: Number.isFinite(expiresIn) ? expiresIn : undefined,
+    });
+
+    const isRegistration = action?.toUpperCase().includes('REGISTER');
+    toast.success(isRegistration ? 'Cuenta creada con OAuth2' : 'Inicio de sesion con OAuth2 exitoso', {
+      description: `Bienvenido, ${user.name}`,
+    });
+
+    navigate(ROLE_REDIRECT_PATHS[user.role], { replace: true });
+  }, [completeOAuthLogin, navigate, searchParams]);
+
+  return (
+    <div className="flex min-h-[45vh] items-center justify-center px-6 text-center">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Procesando inicio de sesion...</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Conectando tu cuenta OAuth2 con EthosHub.</p>
+      </div>
+    </div>
+  );
+}

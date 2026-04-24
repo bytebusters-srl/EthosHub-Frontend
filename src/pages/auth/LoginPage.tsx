@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, LockKeyhole, Mail, Briefcase, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store';
+import { cn } from '@/shared/lib/utils';
 import { Button, Input } from '@/shared/ui';
 import {
   AuthFooterLink,
@@ -19,6 +20,7 @@ type RegisterPrefills = {
   fromRegister?: boolean;
   fullName?: string;
 };
+const OAUTH_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
 
 export default function LoginPage() {
   const location = useLocation();
@@ -26,8 +28,10 @@ export default function LoginPage() {
   const { login, loading } = useAuthStore();
   const prefills = (location.state as { prefills?: RegisterPrefills } | null)?.prefills;
 
-  const [email, setEmail] = useState('demo@ethoshub.com');
-  const [password, setPassword] = useState('demo123');
+  const [selectedRole, setSelectedRole] = useState<'Estandar' | 'Reclutador' | null>(null);
+  const [showRoleRequiredMessage, setShowRoleRequiredMessage] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -45,21 +49,33 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Use professional as default role, but the authService will override
-    // based on the email if it matches a mock credential
     const result = await login(email, password, 'professional');
     
     if (result) {
-      // Show welcome toast with role
       toast.success(`Bienvenido de nuevo, ${result.roleDisplayName}`, {
         description: 'Has iniciado sesion correctamente',
         duration: 4000,
       });
-      
-      // Navigate to role-specific path
       navigate(result.redirectPath);
+    } else {
+      toast.error('No se pudo iniciar sesion', {
+        description: 'Verifica tus credenciales e intenta nuevamente.',
+      });
     }
+  };
+
+  const handleOAuth = (provider: 'google' | 'github') => {
+    if (!selectedRole) {
+      setShowRoleRequiredMessage(true);
+      toast.error('Debes elegir un rol antes de continuar', {
+        description: 'Selecciona si eres Profesional o Reclutador para usar OAuth2.',
+      });
+      return;
+    }
+
+    const oauthRole = selectedRole === 'Estandar' ? 'PROFESSIONAL' : 'RECRUITER';
+    const target = `${OAUTH_BASE_URL}/oauth2/authorization/${provider}?role=${oauthRole}`;
+    window.location.href = target;
   };
 
   return (
@@ -101,6 +117,64 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-6 px-5 py-6 sm:px-8 sm:py-8">
+          <div className="grid grid-cols-2 gap-4">
+            <motion.button
+              type="button"
+              onClick={() => {
+                setSelectedRole('Estandar');
+                setShowRoleRequiredMessage(false);
+              }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                'relative flex flex-col items-center gap-3 rounded-2xl border-2 p-5 text-center transition-all duration-200',
+                selectedRole === 'Estandar'
+                  ? 'border-ethoshub-blue bg-ethoshub-blue/5 shadow-[0_0_20px_-5px_rgba(37,99,235,0.3)] dark:bg-ethoshub-blue/10 dark:shadow-[0_0_25px_-5px_rgba(37,99,235,0.4)]'
+                  : 'border-border bg-card opacity-70 hover:opacity-100 hover:border-muted-foreground/30'
+              )}
+            >
+              <div className={cn(
+                'flex h-12 w-12 items-center justify-center rounded-xl transition-colors',
+                selectedRole === 'Estandar' ? 'bg-ethoshub-blue text-white' : 'bg-muted text-muted-foreground'
+              )}>
+                <Briefcase className="h-6 w-6" />
+              </div>
+              <p className={cn('text-sm font-semibold', selectedRole === 'Estandar' ? 'text-foreground' : 'text-muted-foreground')}>
+                Soy Profesional
+              </p>
+            </motion.button>
+
+            <motion.button
+              type="button"
+              onClick={() => {
+                setSelectedRole('Reclutador');
+                setShowRoleRequiredMessage(false);
+              }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                'relative flex flex-col items-center gap-3 rounded-2xl border-2 p-5 text-center transition-all duration-200',
+                selectedRole === 'Reclutador'
+                  ? 'border-ethoshub-blue bg-ethoshub-blue/5 shadow-[0_0_20px_-5px_rgba(37,99,235,0.3)] dark:bg-ethoshub-blue/10 dark:shadow-[0_0_25px_-5px_rgba(37,99,235,0.4)]'
+                  : 'border-border bg-card opacity-70 hover:opacity-100 hover:border-muted-foreground/30'
+              )}
+            >
+              <div className={cn(
+                'flex h-12 w-12 items-center justify-center rounded-xl transition-colors',
+                selectedRole === 'Reclutador' ? 'bg-ethoshub-blue text-white' : 'bg-muted text-muted-foreground'
+              )}>
+                <Building2 className="h-6 w-6" />
+              </div>
+              <p className={cn('text-sm font-semibold', selectedRole === 'Reclutador' ? 'text-foreground' : 'text-muted-foreground')}>
+                Soy Reclutador
+              </p>
+            </motion.button>
+          </div>
+
+          {!selectedRole && showRoleRequiredMessage && (
+            <p className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
+              Debes seleccionar un rol antes de continuar con Google o GitHub.
+            </p>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Field */}
             <div>
@@ -169,15 +243,6 @@ export default function LoginPage() {
               Iniciar sesion
             </Button>
 
-            {/* Demo Credentials */}
-            <div className="rounded-xl border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
-              <p className="font-semibold text-foreground">Credenciales demo por rol</p>
-              <div className="mt-2 space-y-1.5">
-                <p><span className="font-medium text-ethoshub-blue">Profesional:</span> profesional@ethoshub.com / demo</p>
-                <p><span className="font-medium text-ethoshub-blue">Reclutador:</span> reclutador@ethoshub.com / demo</p>
-                <p><span className="font-medium text-ethoshub-blue">Admin:</span> admin@ethoshub.com / demo</p>
-              </div>
-            </div>
           </form>
 
           {/* Divider */}
@@ -193,6 +258,7 @@ export default function LoginPage() {
           <SocialAuthGroup
             googleLabel="Continuar con Google"
             githubLabel="Continuar con GitHub"
+            onProviderClick={handleOAuth}
           />
 
           <AuthFooterLink prompt="No tienes cuenta?" cta="Crear cuenta" to="/register" />
