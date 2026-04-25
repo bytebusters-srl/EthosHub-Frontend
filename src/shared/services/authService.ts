@@ -16,6 +16,7 @@ type BackendAuthResponse = {
   userId: string;
   email: string;
   role?: string;
+  profileId?: string;
 };
 
 export type LoginApiResult = {
@@ -99,7 +100,8 @@ async function login(email: string, password: string, role?: UserRole): Promise<
     name: authResponse.email.split('@')[0],
     username: authResponse.email.split('@')[0],
     avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authResponse.email)}`,
-    role: finalRole, 
+    role: finalRole,
+    profile_id: authResponse.profileId,
     slug: sanitizeSlug(authResponse.email.split('@')[0]),
     profession: finalRole === 'recruiter' ? 'Reclutador' : 'Profesional',
     bio: '',

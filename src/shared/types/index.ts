@@ -18,6 +18,7 @@ export interface User {
   // Campos añadidos para la sincronización con la DB
   status?: string;    // Mapeado a core.availabilities.status [cite: 179]
   seniority?: string; // Mapeado a core.profiles_basic.seniority [cite: 377]
+  profile_id?: string; // ID del perfil en la tabla core.profiles
   createdAt?: string;
 }
 export interface AuthState {
@@ -334,6 +335,23 @@ export interface AcademicRecord {
   credentialUrl?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// =============================================
+// RECRUITER PROFILE (Perfil de Empresa)
+// =============================================
+export interface CompanyProfile {
+  profile_id?: string;
+  company_name: string;
+  industry: string;
+  company_size: number | string;
+  nit: string;
+  contact_first_name: string;
+  contact_last_name: string;
+  website_url: string;
+  location?: string;
+  description?: string;
+  logo_url?: string;
 }
 
 // =============================================
