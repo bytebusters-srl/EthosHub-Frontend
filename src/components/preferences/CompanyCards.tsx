@@ -4,10 +4,8 @@ import { Card } from '@/shared/ui';
 import { useAuthStore } from '@/store/authStore';
 import { companyProfileService } from '@/shared/services/companyProfileService';
 
-
-// 🏢 Tarjeta para los datos de la Empresa (Alineado con perfiles_company)
 export function CompanyProfileCard() {
-  const { user } = useAuthStore();
+  const { user, syncUser } = useAuthStore();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -22,7 +20,6 @@ export function CompanyProfileCard() {
     websiteUrl: '',
   });
 
-  // Cargar datos del perfil cuando el componente se monta
   useEffect(() => {
     if (user?.profile_id) {
       loadCompanyProfile();
@@ -31,7 +28,6 @@ export function CompanyProfileCard() {
 
   const loadCompanyProfile = async () => {
     if (!user?.profile_id) return;
-    
     try {
       const profile = await companyProfileService.getCompanyProfile(user.profile_id);
       if (profile) {
@@ -44,9 +40,12 @@ export function CompanyProfileCard() {
           contactLastName: profile.contact_last_name || '',
           websiteUrl: profile.website_url || '',
         });
+
+        syncUser({
+          website: profile.website_url || '',
+        });
       }
     } catch (error) {
-      // No mostrar error si el perfil no existe aún (es normal en primera vez)
       console.debug('Perfil de empresa no encontrado, se creará al guardar');
     }
   };
@@ -55,7 +54,7 @@ export function CompanyProfileCard() {
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
-    
+
     if (!user?.profile_id) {
       setErrorMessage('No se encontró el ID del perfil');
       return;
@@ -72,7 +71,12 @@ export function CompanyProfileCard() {
         contact_last_name: formData.contactLastName,
         website_url: formData.websiteUrl,
       });
-      
+
+      syncUser({
+        name: `${formData.contactFirstName} ${formData.contactLastName}`.trim(),
+        website: formData.websiteUrl,
+      });
+
       setSuccessMessage('Perfil de empresa guardado correctamente');
       setTimeout(() => {
         setSuccessMessage('');
@@ -87,8 +91,7 @@ export function CompanyProfileCard() {
 
   return (
     <Card className="w-full overflow-hidden border-gray-200 bg-white transition-colors dark:border-white/10 dark:bg-zinc-950">
-      {/* Cabecera (Click para expandir) */}
-      <div 
+      <div
         className="flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-gray-50 sm:p-6 dark:hover:bg-white/[0.02]"
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -110,10 +113,8 @@ export function CompanyProfileCard() {
         </div>
       </div>
 
-      {/* Formulario Expandible */}
       {isExpanded && (
         <div className="border-t border-gray-100 bg-gray-50/50 p-4 sm:p-6 dark:border-white/5 dark:bg-black/20">
-          {/* Mensajes de éxito/error */}
           {successMessage && (
             <div className="mb-4 flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
               <CheckCircle className="h-5 w-5 shrink-0" />
@@ -210,18 +211,20 @@ export function CompanyProfileCard() {
                   required
                 />
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-black dark:text-white">Sitio web</label>
-              <input
-                type="url"
-                placeholder="https://miempresa.com"
-                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-black focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 disabled:opacity-50 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
-                value={formData.websiteUrl}
-                onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
-                disabled={isLoading}
-              />
+              {/* Sitio web y Teléfono lado a lado */}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-black dark:text-white">Sitio web</label>
+                <input
+                  type="url"
+                  placeholder="https://miempresa.com"
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-black focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 disabled:opacity-50 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+                  value={formData.websiteUrl}
+                  onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
+                  disabled={isLoading}
+                />
+              </div>
+
             </div>
 
             <div className="flex justify-end gap-2 pt-2">

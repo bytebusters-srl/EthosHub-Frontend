@@ -1,5 +1,13 @@
 import type { User, UserRole } from '@/shared/types';
 
+export type ProfileUpdatePayload = Partial<User> & {
+  firstName?: string;
+  lastName?: string;
+  photoUrl?: string;
+  country?: string;
+  phone?: string;
+};
+
 const API_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
 
 type ApiEnvelope<T> = {
@@ -148,12 +156,14 @@ async function getProfile(userId: string): Promise<Partial<User>> {
     name: `${data.firstName} ${data.lastName}`.trim(),
     bio: data.bio,
     avatar: data.photoUrl,
+    location: data.country,
+    phone: data.phone,
     status: data.availabilityStatus,
     seniority: data.seniority
   };
 }
 
-async function updateProfile(userId: string, data: Partial<User> & Record<string, any>): Promise<User> {
+async function updateProfile(userId: string, data: ProfileUpdatePayload): Promise<User> {
   const token = localStorage.getItem('ethoshub_access_token');
 
   if (!token) {
@@ -171,6 +181,8 @@ async function updateProfile(userId: string, data: Partial<User> & Record<string
       lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
       bio: data.bio || '',
       photoUrl: data.photoUrl || data.avatar || '',
+      country: data.country || data.location || '',
+      phone: data.phone || '',
       availabilityStatus: data.availabilityStatus || data.status || 'Disponible',
       seniority: data.seniority || 'Junior'
     })
@@ -180,7 +192,13 @@ async function updateProfile(userId: string, data: Partial<User> & Record<string
     throw new Error(`Fallo al comunicarse con el servidor: Error ${response.status}`);
   }
 
-  return { id: userId, ...data } as User;
+  return {
+    id: userId,
+    ...data,
+    avatar: data.photoUrl || data.avatar,
+    location: data.country || data.location,
+    phone: data.phone,
+  } as User;
 }
 
 async function logout(): Promise<void> {}

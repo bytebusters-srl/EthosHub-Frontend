@@ -4,9 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   FileText,
   Sparkles,
-  Mail,
-  Phone,
-  Globe2,
   Briefcase,
   GraduationCap,
   ChevronRight,
@@ -67,7 +64,6 @@ export function BiographyCard({ initialBio, onSave }: BiographyCardProps) {
         />
       </div>
 
-      {/* Collapsed Preview */}
       {!isExpanded && bio && (
         <div className="mt-4">
           <p
@@ -82,7 +78,6 @@ export function BiographyCard({ initialBio, onSave }: BiographyCardProps) {
         </div>
       )}
 
-      {/* Expanded Content */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -189,7 +184,6 @@ export function SkillsCard({ skills, onAddSkill, onRemoveSkill }: SkillsCardProp
         />
       </div>
 
-      {/* Collapsed Preview */}
       {!isExpanded && skills.length > 0 && (
         <div className="mt-4">
           <div
@@ -218,7 +212,6 @@ export function SkillsCard({ skills, onAddSkill, onRemoveSkill }: SkillsCardProp
         </div>
       )}
 
-      {/* Expanded Content */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -230,7 +223,6 @@ export function SkillsCard({ skills, onAddSkill, onRemoveSkill }: SkillsCardProp
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mt-5 space-y-4">
-              {/* Skills Display */}
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill) => {
                   const Icon = skillIcons[skill.category] || Layers;
@@ -256,7 +248,6 @@ export function SkillsCard({ skills, onAddSkill, onRemoveSkill }: SkillsCardProp
                 })}
               </div>
 
-              {/* Add Skill Input */}
               <div className="flex flex-col gap-3 sm:flex-row">
                 <select
                   value={selectedCategory}
@@ -264,9 +255,7 @@ export function SkillsCard({ skills, onAddSkill, onRemoveSkill }: SkillsCardProp
                   className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-black transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/20 dark:bg-black dark:text-white"
                 >
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
+                    <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
                 <div className="flex flex-1 gap-2">
@@ -292,138 +281,6 @@ export function SkillsCard({ skills, onAddSkill, onRemoveSkill }: SkillsCardProp
               <div className="flex justify-end">
                 <Button variant="ghost" size="sm" onClick={() => setIsExpanded(false)} className="text-black hover:bg-gray-100 dark:text-white dark:hover:bg-white/10">
                   Cerrar
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Card>
-  );
-}
-
-// =============================================
-// CONTACT CARD
-// =============================================
-interface ContactInfo {
-  email: string;
-  phone: string;
-  website: string;
-}
-
-interface ContactCardProps {
-  contact: ContactInfo;
-  onSave: (contact: ContactInfo) => void;
-}
-
-export function ContactCard({ contact, onSave }: ContactCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [formData, setFormData] = useState(contact);
-
-  const handleSave = () => {
-    onSave(formData);
-    setIsExpanded(false);
-  };
-
-  const handleCancel = () => {
-    setFormData(contact);
-    setIsExpanded(false);
-  };
-
-  return (
-    <Card
-      className={`w-full cursor-pointer border-gray-200 bg-white p-4 transition-all duration-300 sm:p-6 dark:border-white/10 dark:bg-zinc-950 ${
-        isExpanded ? 'ring-2 ring-violet-500/50' : 'hover:border-violet-500/30 dark:hover:border-violet-500/50'
-      }`}
-      onClick={() => !isExpanded && setIsExpanded(true)}
-    >
-      <div className="flex items-center gap-2 sm:gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600 sm:h-11 sm:w-11 sm:rounded-2xl dark:bg-cyan-500/10 dark:text-cyan-400">
-          <Mail className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold text-black sm:text-xl dark:text-white">Contacto</h2>
-          <p className="truncate text-xs text-gray-500 sm:text-sm dark:text-gray-400">
-            Canales de comunicacion
-          </p>
-        </div>
-        <ChevronRight
-          className={`h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 dark:text-gray-500 ${
-            isExpanded ? 'rotate-90' : ''
-          }`}
-        />
-      </div>
-
-      {/* Collapsed Preview */}
-      {!isExpanded && (
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <Mail className="h-4 w-4" />
-            <span className="truncate">{contact.email || 'Sin email'}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Expanded Content */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mt-5 space-y-4">
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-black dark:text-white">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                  placeholder="tu@email.com"
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-black placeholder:text-gray-400 transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/20 dark:bg-black dark:text-white dark:placeholder:text-gray-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-black dark:text-white">
-                  <Phone className="h-4 w-4" />
-                  Telefono
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                  placeholder="+52 55 1234 5678"
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-black placeholder:text-gray-400 transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/20 dark:bg-black dark:text-white dark:placeholder:text-gray-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-black dark:text-white">
-                  <Globe2 className="h-4 w-4" />
-                  Sitio web
-                </label>
-                <input
-                  type="url"
-                  value={formData.website}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, website: e.target.value }))}
-                  placeholder="https://tusitio.com"
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-black placeholder:text-gray-400 transition-colors focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/20 dark:bg-black dark:text-white dark:placeholder:text-gray-500"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="sm" onClick={handleCancel} className="text-black hover:bg-gray-100 dark:text-white dark:hover:bg-white/10">
-                  Cancelar
-                </Button>
-                <Button variant="primary" size="sm" onClick={handleSave} className="bg-violet-600 text-white hover:bg-violet-700">
-                  Guardar
                 </Button>
               </div>
             </div>

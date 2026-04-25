@@ -52,6 +52,7 @@ export const companyProfileService = {
       contactFirstName: string;
       contactLastName: string;
       websiteUrl: string;
+      phone?: string;
     }>(`/api/v1/recruiter/profile/company/${profileId}`, {
       method: 'PUT',
       body: JSON.stringify({
@@ -64,6 +65,7 @@ export const companyProfileService = {
         contactFirstName: companyData.contact_first_name || '',
         contactLastName: companyData.contact_last_name || '',
         websiteUrl: companyData.website_url,
+        phone: companyData.phone || '',
       }),
     });
 
@@ -76,6 +78,7 @@ export const companyProfileService = {
       contact_first_name: response.contactFirstName,
       contact_last_name: response.contactLastName,
       website_url: response.websiteUrl,
+      phone: response.phone,
     };
   },
 
@@ -92,6 +95,7 @@ export const companyProfileService = {
       contactFirstName: string;
       contactLastName: string;
       websiteUrl: string;
+      phone?: string;
     }>(`/api/v1/recruiter/profile/company/${profileId}`, {
       method: 'GET',
     });
@@ -105,6 +109,7 @@ export const companyProfileService = {
       contact_first_name: response.contactFirstName,
       contact_last_name: response.contactLastName,
       website_url: response.websiteUrl,
+      phone: response.phone,
     };
   },
 };

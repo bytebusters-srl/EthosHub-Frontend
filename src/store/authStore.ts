@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, UserRole } from '@/shared/types';
-import { authService, ROLE_DISPLAY_NAMES, ROLE_REDIRECT_PATHS } from '@/shared/services/authService';
+import { authService, ROLE_DISPLAY_NAMES, ROLE_REDIRECT_PATHS, type ProfileUpdatePayload } from '@/shared/services/authService';
 
 const ACCESS_TOKEN_KEY = 'ethoshub_access_token';
 const TOKEN_TYPE_KEY = 'ethoshub_token_type';
@@ -19,7 +19,8 @@ interface AuthStore {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string, role?: UserRole) => Promise<LoginResult | null>;
-  updateProfile: (data: Partial<User>) => Promise<void>;
+  updateProfile: (data: ProfileUpdatePayload) => Promise<void>;
+  syncUser: (data: Partial<User>) => void;
   fetchProfile: () => Promise<void>; // <-- Añadido al tipado
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -89,7 +90,7 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      updateProfile: async (data: Partial<User>) => {
+      updateProfile: async (data: ProfileUpdatePayload) => {
         const { user } = get();
         if (!user) return;
         set({ loading: true, error: null });
@@ -100,13 +101,23 @@ export const useAuthStore = create<AuthStore>()(
             user: { 
               ...user, 
               ...(updatedUser || {}), 
-              ...data 
+              ...data,
+              name: data.firstName || data.lastName ? `${data.firstName || user.name.split(' ')[0]} ${data.lastName || user.name.split(' ').slice(1).join(' ')}`.trim() : user.name,
+              avatar: data.photoUrl || data.avatar || user.avatar,
+              location: data.country || data.location || user.location,
+              phone: data.phone || user.phone,
             }, 
             loading: false 
           });
         } catch {
           set({ error: 'Error al actualizar perfil', loading: false });
         }
+      },
+
+      syncUser: (data: Partial<User>) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, ...data } : state.user,
+        }));
       },
 
       logout: async () => {

@@ -20,7 +20,6 @@ import { ProfileEditorModal } from '@/components/preferences/ProfileEditorModal'
 import {
   BiographyCard,
   SkillsCard,
-  ContactCard,
   ProjectsCard,
   ExperienceCard,
 } from '@/components/preferences/ExpandableCards';
@@ -34,7 +33,6 @@ const workSignals = [
   'Preferencia por equipos pequenos, iteracion rapida y ownership claro.',
 ];
 
-// Mock skills data for demo
 const initialSkills = [
   { id: '1', name: 'React', category: 'Frontend' },
   { id: '2', name: 'TypeScript', category: 'Frontend' },
@@ -71,10 +69,6 @@ export default function PreferencesPage() {
     setSkills((prev) => prev.filter((s) => s.id !== skillId));
   };
 
-  const handleContactSave = async (contact: { email: string; phone: string; website: string }) => {
-    await updateProfile({ website: contact.website });
-  };
-
   if (loading && !preferences) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center bg-gray-50 dark:bg-black">
@@ -95,7 +89,6 @@ export default function PreferencesPage() {
     );
   }
 
-  // 🔒 DEFINICIÓN DE ROLES PARA LA VISTA
   const isAdmin = user.role === 'admin';
   const isRecruiter = user.role === 'recruiter';
   const isProfessional = !isAdmin && !isRecruiter;
@@ -118,10 +111,10 @@ export default function PreferencesPage() {
                   {isAdmin ? 'Preferencias del Sistema' : isRecruiter ? 'Preferencias de cuenta' : 'Preferencias del perfil profesional'}
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-500 dark:text-gray-400">
-                  {isAdmin 
+                  {isAdmin
                     ? 'Ajusta la seguridad de tu cuenta de administrador y preferencias visuales del panel.'
-                    : isRecruiter 
-                    ? 'Configura los ajustes de tu cuenta y detalles de la empresa.' 
+                    : isRecruiter
+                    ? 'Configura los ajustes de tu cuenta y detalles de la empresa.'
                     : 'Personaliza tu identidad, habilidades y secciones del portafolio. Haz clic en cada seccion para expandirla y editarla.'}
                 </p>
               </div>
@@ -143,7 +136,6 @@ export default function PreferencesPage() {
 
             {/* User Card with Edit Button */}
             <div className="relative w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 backdrop-blur sm:rounded-3xl sm:p-5 dark:border-white/10 dark:bg-black/40">
-              {/* Ocultamos el botón de editar perfil para el Admin, ya que no tiene perfil público que editar */}
               {!isAdmin && (
                 <button
                   type="button"
@@ -199,11 +191,10 @@ export default function PreferencesPage() {
 
       {/* Main Grid */}
       <div className="flex w-full flex-col gap-4 sm:gap-6 xl:grid xl:grid-cols-[1.15fr_0.85fr]">
-        
-        {/* Left Column - Interactive Cards */}
+
+        {/* Left Column */}
         <div className="w-full space-y-3 sm:space-y-4">
-          
-          {/* 💻 CONDICIONAL PROFESIONAL */}
+
           {isProfessional && (
             <>
               <BiographyCard initialBio={user.bio || ''} onSave={handleBioSave} />
@@ -214,33 +205,16 @@ export default function PreferencesPage() {
             </>
           )}
 
-          {/* 🏢 CONDICIONAL RECLUTADOR */}
           {isRecruiter && (
-            <>
-              <CompanyProfileCard />
-            </>
+            <CompanyProfileCard />
           )}
 
-          {/* Contacto: Visible solo para profesionales y reclutadores */}
-          {!isAdmin && (
-            <ContactCard
-              contact={{
-                email: user.email,
-                phone: '',
-                website: user.website || '',
-              }}
-              onSave={handleContactSave}
-            />
-          )}
-
-          {/* Seguridad de cuenta: Visible para TODOS (Admin incluido) */}
           <AccountSecurityCard />
         </div>
 
-        {/* Right Column - Static Info */}
+        {/* Right Column */}
         <div className="w-full space-y-4 sm:space-y-6 xl:sticky xl:top-24 xl:self-start">
-          
-          {/* Account Preferences (Visible para todos) */}
+
           <Card className="w-full border-gray-200 bg-white p-4 sm:p-6 dark:border-white/10 dark:bg-zinc-950">
             <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 sm:h-11 sm:w-11 sm:rounded-2xl dark:bg-violet-500/10 dark:text-violet-400">
@@ -248,9 +222,7 @@ export default function PreferencesPage() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-black sm:text-xl dark:text-white">Preferencias visuales</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Ajustes base cargados localmente.
-                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Ajustes base cargados localmente.</p>
               </div>
             </div>
 
@@ -267,8 +239,6 @@ export default function PreferencesPage() {
                 value={preferences?.theme ?? 'light'}
                 hint="Preferencia visual guardada localmente."
               />
-              
-              {/* Opciones exclusivas del talento */}
               {isProfessional && (
                 <>
                   <PreferenceTile
@@ -288,10 +258,8 @@ export default function PreferencesPage() {
             </div>
           </Card>
 
-          {/* 💻 CONDICIONAL PROFESIONAL */}
           {isProfessional && (
             <>
-              {/* Portfolio Order */}
               <Card className="w-full border-gray-200 bg-white p-4 sm:p-6 dark:border-white/10 dark:bg-zinc-950">
                 <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 sm:h-11 sm:w-11 sm:rounded-2xl dark:bg-emerald-500/10 dark:text-emerald-400">
@@ -299,9 +267,7 @@ export default function PreferencesPage() {
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-black sm:text-xl dark:text-white">Orden del portafolio</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Secuencia sugerida para tu perfil publico.
-                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Secuencia sugerida para tu perfil publico.</p>
                   </div>
                 </div>
 
@@ -317,9 +283,7 @@ export default function PreferencesPage() {
                         </div>
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium text-black sm:text-base dark:text-white">{formatSectionLabel(section)}</p>
-                          <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-                            {sectionDescription(section)}
-                          </p>
+                          <p className="truncate text-xs text-gray-500 dark:text-gray-400">{sectionDescription(section)}</p>
                         </div>
                       </div>
                       <LayoutTemplate className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" />
@@ -328,7 +292,6 @@ export default function PreferencesPage() {
                 </div>
               </Card>
 
-              {/* Work Signals */}
               <Card className="w-full border-gray-200 bg-white p-4 sm:p-6 dark:border-white/10 dark:bg-zinc-950">
                 <h2 className="text-base font-semibold text-black sm:text-lg dark:text-white">Senales de trabajo</h2>
                 <div className="mt-3 space-y-2 sm:mt-4 sm:space-y-3">
@@ -342,7 +305,6 @@ export default function PreferencesPage() {
             </>
           )}
 
-          {/* Profile Summary (Oculto para el admin ya que su info principal ya sale arriba) */}
           {!isAdmin && (
             <Card className="w-full border-gray-200 bg-white p-4 sm:p-6 dark:border-white/10 dark:bg-zinc-950">
               <h2 className="text-base font-semibold text-black sm:text-lg dark:text-white">Resumen del perfil</h2>
@@ -357,7 +319,6 @@ export default function PreferencesPage() {
         </div>
       </div>
 
-      {/* Profile Editor Modal (Solo se renderiza si no es admin, aunque el botón de abrirlo ya está oculto) */}
       {!isAdmin && (
         <ProfileEditorModal
           isOpen={isProfileModalOpen}
@@ -368,7 +329,6 @@ export default function PreferencesPage() {
   );
 }
 
-// Las funciones PreferenceTile, SummaryRow, formatSectionLabel y sectionDescription
 function PreferenceTile({
   icon: Icon,
   label,
@@ -414,7 +374,6 @@ function formatSectionLabel(section: string) {
     formacion: 'Formacion',
     contact: 'Contacto',
   };
-
   return map[section] ?? section;
 }
 
@@ -427,6 +386,5 @@ function sectionDescription(section: string) {
     formacion: 'Trayectoria academica y certificaciones.',
     contact: 'Canales de contacto y conversion.',
   };
-
   return map[section] ?? 'Seccion del portafolio.';
 }

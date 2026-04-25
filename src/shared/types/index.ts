@@ -15,6 +15,9 @@ export interface User {
   profession?: string;
   headline?: string;
   location?: string;
+  country?: string;
+  phone?: string;
+  website?: string;
   // Campos añadidos para la sincronización con la DB
   status?: string;    // Mapeado a core.availabilities.status [cite: 179]
   seniority?: string; // Mapeado a core.profiles_basic.seniority [cite: 377]
@@ -349,6 +352,7 @@ export interface CompanyProfile {
   contact_first_name: string;
   contact_last_name: string;
   website_url: string;
+  phone?: string;
   location?: string;
   description?: string;
   logo_url?: string;
