@@ -17,6 +17,7 @@ import { Badge, Card, EmptyState, LoadingSpinner } from '@/shared/ui';
 import { useAuthStore } from '@/store/authStore';
 import { usePreferencesStore } from '@/store/preferencesStore';
 import { ProfileEditorModal } from '@/components/preferences/ProfileEditorModal';
+import { RecruiterProfileEditorModal } from '@/components/preferences/RecruiterProfileEditorModal';
 import {
   BiographyCard,
   SkillsCard,
@@ -309,9 +310,9 @@ export default function PreferencesPage() {
             <Card className="w-full border-gray-200 bg-white p-4 sm:p-6 dark:border-white/10 dark:bg-zinc-950">
               <h2 className="text-base font-semibold text-black sm:text-lg dark:text-white">Resumen del perfil</h2>
               <div className="mt-3 space-y-2 sm:mt-4 sm:space-y-4">
-                <SummaryRow label="Slug publico" value={user.slug} />
+                <SummaryRow label="Slug publico" value={user.slug || 'N/A'} />
                 <SummaryRow label="Rol activo" value={user.role} />
-                <SummaryRow label="Ubicacion" value={user.location} />
+                <SummaryRow label="Ubicacion" value={user.location || 'N/A'} />
                 <SummaryRow label="Sitio personal" value={user.website || 'No configurado'} />
               </div>
             </Card>
@@ -319,8 +320,15 @@ export default function PreferencesPage() {
         </div>
       </div>
 
-      {!isAdmin && (
+      {isProfessional && (
         <ProfileEditorModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+        />
+      )}
+
+      {isRecruiter && (
+        <RecruiterProfileEditorModal
           isOpen={isProfileModalOpen}
           onClose={() => setIsProfileModalOpen(false)}
         />
