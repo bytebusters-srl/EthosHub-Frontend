@@ -18,7 +18,7 @@ interface AuthStore {
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string, role: UserRole) => Promise<LoginResult | null>;
+  login: (email: string, password: string, role?: UserRole) => Promise<LoginResult | null>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -41,16 +41,15 @@ export const useAuthStore = create<AuthStore>()(
       loading: false,
       error: null,
 
-      // Se removió el guion bajo a 'role' para usarlo activamente
-      login: async (email: string, password: string, role: UserRole): Promise<LoginResult | null> => {
+      login: async (email: string, password: string, role?: UserRole): Promise<LoginResult | null> => {
         set({ loading: true, error: null });
         try {
-          // Pasamos el rol seleccionado al servicio
           const result = await authService.login(email, password, role);
           const user = result.user;
 
           localStorage.setItem(ACCESS_TOKEN_KEY, result.token);
           localStorage.setItem(TOKEN_TYPE_KEY, result.tokenType || 'Bearer');
+          
           if (typeof result.expiresIn === 'number' && Number.isFinite(result.expiresIn)) {
             localStorage.setItem(EXPIRES_AT_KEY, String(Date.now() + result.expiresIn));
           } else {
@@ -75,11 +74,7 @@ export const useAuthStore = create<AuthStore>()(
 
       updateProfile: async (data: Partial<User>) => {
         const { user } = get();
-        if (!user) {
-          set({ error: 'No hay usuario autenticado' });
-          return;
-        }
-
+        if (!user) return;
         set({ loading: true, error: null });
         try {
           const updatedUser = await authService.updateProfile(user.id, data);
@@ -104,44 +99,31 @@ export const useAuthStore = create<AuthStore>()(
 
       checkAuth: async () => {
         const { user } = get();
-        if (user) {
-          set({ isAuthenticated: true });
-        }
+        if (user) set({ isAuthenticated: true });
       },
 
       completeOAuthLogin: ({ user, token, tokenType = 'Bearer', expiresIn }) => {
         localStorage.setItem(ACCESS_TOKEN_KEY, token);
         localStorage.setItem(TOKEN_TYPE_KEY, tokenType);
-        if (typeof expiresIn === 'number' && Number.isFinite(expiresIn)) {
-          localStorage.setItem(EXPIRES_AT_KEY, String(Date.now() + expiresIn));
-        } else {
-          localStorage.removeItem(EXPIRES_AT_KEY);
-        }
-
+        if (expiresIn) localStorage.setItem(EXPIRES_AT_KEY, String(Date.now() + expiresIn));
         set({ user, isAuthenticated: true, error: null, loading: false });
       },
 
       switchRole: (role: UserRole) => {
         const { user } = get();
-        if (user) {
-          set({ user: { ...user, role } });
-        }
+        if (user) set({ user: { ...user, role } });
       },
 
       getRoleDisplayName: () => {
         const { user } = get();
-        if (!user) return 'Invitado';
-        return ROLE_DISPLAY_NAMES[user.role] || 'Usuario';
+        return user ? ROLE_DISPLAY_NAMES[user.role] : 'Invitado';
       },
 
       getRedirectPath: () => {
         const { user } = get();
-        if (!user) return '/';
-        return ROLE_REDIRECT_PATHS[user.role] || '/dashboard';
+        return user ? ROLE_REDIRECT_PATHS[user.role] : '/';
       },
     }),
-    {
-      name: 'ethoshub_auth',
-    }
+    { name: 'ethoshub_auth' }
   )
 );
