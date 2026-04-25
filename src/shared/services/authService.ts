@@ -82,17 +82,14 @@ async function login(email: string, password: string, role?: UserRole): Promise<
     body: JSON.stringify({ email: normalizedEmail, password }),
   });
 
-  // NUEVA LÓGICA: Leemos el rol que viene de Spring Boot
-  let finalRole: UserRole = 'professional'; // Por defecto
+  let finalRole: UserRole = 'professional'; 
 
   if (authResponse.role) {
-    // Normalizamos el texto por si Spring Boot envía "ROLE_RECRUITER", "RECRUITER", etc.
     const backendRole = authResponse.role.toUpperCase();
     if (backendRole.includes('RECRUITER') || backendRole.includes('RECLUTADOR')) {
       finalRole = 'recruiter';
     }
   } else if (role) {
-    // Fallback por si acaso se sigue enviando desde algún lado
     finalRole = role;
   }
 
@@ -102,13 +99,12 @@ async function login(email: string, password: string, role?: UserRole): Promise<
     name: authResponse.email.split('@')[0],
     username: authResponse.email.split('@')[0],
     avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authResponse.email)}`,
-    role: finalRole, // Usamos el rol calculado
+    role: finalRole, 
     slug: sanitizeSlug(authResponse.email.split('@')[0]),
     profession: finalRole === 'recruiter' ? 'Reclutador' : 'Profesional',
     bio: '',
     headline: finalRole === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
     location: '',
-    website: '',
     createdAt: new Date().toISOString(),
   };
 
@@ -132,8 +128,56 @@ async function registerLocal(email: string, password: string, role: UserRole): P
   });
 }
 
-async function updateProfile(userId: string, data: Partial<User>): Promise<User> {
-  // Simulación local para el ejemplo
+async function getProfile(userId: string): Promise<Partial<User>> {
+  const token = localStorage.getItem('ethoshub_access_token');
+  
+  const response = await fetch(`${API_BASE_URL}/api/v1/profiles/${userId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) throw new Error('No se pudo cargar el perfil');
+  
+  const data = await response.json();
+  
+  return {
+    name: `${data.firstName} ${data.lastName}`.trim(),
+    bio: data.bio,
+    avatar: data.photoUrl,
+    status: data.availabilityStatus,
+    seniority: data.seniority
+  };
+}
+
+async function updateProfile(userId: string, data: Partial<User> & Record<string, any>): Promise<User> {
+  const token = localStorage.getItem('ethoshub_access_token');
+
+  if (!token) {
+    throw new Error('No hay token de sesión activo. Debes iniciar sesión de nuevo.');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/profiles/${userId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      firstName: data.firstName || data.name?.split(' ')[0] || '',
+      lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
+      bio: data.bio || '',
+      photoUrl: data.photoUrl || data.avatar || '',
+      availabilityStatus: data.availabilityStatus || data.status || 'Disponible',
+      seniority: data.seniority || 'Junior'
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Fallo al comunicarse con el servidor: Error ${response.status}`);
+  }
+
   return { id: userId, ...data } as User;
 }
 
@@ -143,6 +187,7 @@ export const authService = {
   login,
   registerLocal,
   updateProfile,
+  getProfile,
   logout,
   ROLE_DISPLAY_NAMES,
   ROLE_REDIRECT_PATHS,

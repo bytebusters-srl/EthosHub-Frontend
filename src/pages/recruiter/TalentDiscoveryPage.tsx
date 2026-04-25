@@ -21,7 +21,6 @@ import {
   CardContent,
   EmptyState,
 } from '@/shared/ui';
-import { EthosCoreLogo } from '@/components/brand/EthosCoreLogo';
 
 // Interface del Backend
 export interface BackendTalentProfile {
@@ -91,11 +90,11 @@ function TalentCard({ candidate, index, onSaveFavorite, isFavorite }: {
   isFavorite: boolean; 
 }) {
   const navigate = useNavigate();
-  // Extraemos máximo 3 skills para no romper la tarjeta
   const displaySkills = candidate.skills ? candidate.skills.slice(0, 3) : [];
   const remainingSkillsCount = candidate.skills ? candidate.skills.length - 3 : 0;
 
   const getStatusColor = (status: string) => {
+    if (!status) return 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-300';
     const s = status.toLowerCase();
     if (s.includes('disponible') || s === 'available') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400';
     if (s.includes('ocupado') || s === 'busy') return 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400';
@@ -103,6 +102,7 @@ function TalentCard({ candidate, index, onSaveFavorite, isFavorite }: {
   };
 
   const getStatusLabel = (status: string) => {
+    if (!status) return 'No especificado';
     const s = status.toLowerCase();
     if (s.includes('disponible') || s === 'available') return 'Disponible';
     if (s.includes('ocupado') || s === 'busy') return 'Ocupado';
@@ -117,13 +117,11 @@ function TalentCard({ candidate, index, onSaveFavorite, isFavorite }: {
       whileHover={{ scale: 1.02 }}
       className="group relative flex h-full flex-col"
     >
-      {/* Efecto Glow de fondo */}
       <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-violet-600/0 to-purple-600/0 opacity-0 blur transition-all duration-300 group-hover:from-violet-600/20 group-hover:to-purple-600/20 group-hover:opacity-100" />
       
       <Card className="relative flex h-full flex-col rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:border-violet-500/50 hover:shadow-lg dark:border-white/10 dark:bg-zinc-950 dark:hover:border-violet-500/50">
         <CardContent className="flex flex-1 flex-col p-5">
           
-          {/* Cabecera: Avatar, Nombre y Seniority */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-1 gap-3">
               <Avatar 
@@ -147,11 +145,10 @@ function TalentCard({ candidate, index, onSaveFavorite, isFavorite }: {
               </div>
             </div>
             <Badge className="shrink-0 border-0 bg-gradient-to-r from-violet-600 to-purple-600 font-sans text-[10px] font-semibold text-white shadow-md">
-              {candidate.seniority}
+              {candidate.seniority || 'Junior'}
             </Badge>
           </div>
 
-          {/* Skills limitados a 3 */}
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {displaySkills.map((skill, idx) => (
               <div key={idx} className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1 dark:border-white/10 dark:bg-white/5">
@@ -166,12 +163,10 @@ function TalentCard({ candidate, index, onSaveFavorite, isFavorite }: {
             )}
           </div>
 
-          {/* Biografía con line-clamp para mantener misma altura */}
           <p className="mt-4 line-clamp-2 font-sans text-sm leading-relaxed text-gray-600 dark:text-gray-400">
             {candidate.bioHeadline || 'Sin descripción disponible para este perfil.'}
           </p>
 
-          {/* Badges de contexto */}
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
             <Badge variant="outline" className="border-gray-200 bg-transparent text-gray-600 dark:border-white/10 dark:text-gray-400">
               {candidate.yearsOfExperience || 0}+ años
@@ -184,7 +179,6 @@ function TalentCard({ candidate, index, onSaveFavorite, isFavorite }: {
             </Badge>
           </div>
 
-          {/* Botones forzados al final de la tarjeta con mt-auto */}
           <div className="mt-auto pt-5">
             <div className="flex items-center gap-2">
               <Button 
@@ -241,31 +235,33 @@ export default function TalentDiscoveryPage() {
 
   const filteredCandidates = useMemo(() => {
     return talents.filter(candidate => {
-      // 1. Búsqueda por Nombre/Cargo
+      // 0. EXCLUIR PERFILES INCOMPLETOS / NUEVOS
+      if (
+        candidate.professionalTitle === 'Por definir' || 
+        normalizeText(candidate.fullName) === normalizeText('Usuario Nuevo')
+      ) {
+        return false;
+      }
+
       const query = normalizeText(searchQuery);
       if (query && !normalizeText(candidate.fullName + candidate.professionalTitle).includes(query)) return false;
-      
-      // 2. Seniority
       if (seniority && candidate.seniority !== seniority) return false;
 
-      // 3. Estado (Mapeo de UI a valores de DB)
-      if (statusFilter) {
+      if (statusFilter && candidate.availabilityStatus) {
         const s = candidate.availabilityStatus.toLowerCase();
         if (statusFilter === 'disponible' && !(s.includes('disponible') || s === 'available')) return false;
         if (statusFilter === 'ocupado' && !(s.includes('ocupado') || s === 'busy')) return false;
         if (statusFilter === 'incognito' && !(s.includes('incognito') || s === 'offline')) return false;
       }
 
-      // 4. Años de Experiencia
       if (experienceRange) {
-        const years = candidate.years_of_experience || candidate.yearsOfExperience;
+        const years = candidate.yearsOfExperience || 0; 
         if (experienceRange === '0-2' && years > 2) return false;
         if (experienceRange === '3-5' && (years < 3 || years > 5)) return false;
         if (experienceRange === '6-10' && (years < 6 || years > 10)) return false;
         if (experienceRange === '10+' && years < 10) return false;
       }
 
-      // 5. Tipo de Perfil (Lenguaje)
       if (categoryFilter) {
         const cat = normalizeText(categoryFilter);
         const inTitle = normalizeText(candidate.professionalTitle).includes(cat);
@@ -273,15 +269,13 @@ export default function TalentDiscoveryPage() {
         if (!inTitle && !inSkills) return false;
       }
 
-      // 6. Skills (Tags)
       if (skillFilters.length > 0) {
         const cSkills = candidate.skills?.map(s => normalizeText(s)) || [];
         if (!skillFilters.every(f => cSkills.some(cs => cs.includes(normalizeText(f))))) return false;
       }
 
-      // 7. Países (Tags)
       if (countryFilters.length > 0) {
-        if (!countryFilters.some(f => normalizeText(candidate.location).includes(normalizeText(f)))) return false;
+        if (!countryFilters.some(f => normalizeText(candidate.location || '').includes(normalizeText(f)))) return false;
       }
 
       return true;
@@ -297,11 +291,11 @@ export default function TalentDiscoveryPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-black">
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 px-6 py-4 backdrop-blur-sm dark:border-white/10 dark:bg-zinc-950/95">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <EthosCoreLogo size="sm" variant="lilac" />
+          {/* Logo de empresa removido */}
           <div className="relative w-96">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+            {/* Icono de búsqueda removido */}
             <input 
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-violet-500 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white" 
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-4 pr-4 text-sm focus:border-violet-500 focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white" 
               placeholder="Buscar por nombre o cargo..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -312,7 +306,6 @@ export default function TalentDiscoveryPage() {
       </header>
 
       <div className="mx-auto flex max-w-7xl gap-6 p-6">
-        {/* Sidebar de Filtros */}
         <aside className="w-72 shrink-0 space-y-6">
           <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-zinc-950">
             <div className="mb-5 flex items-center gap-2">
@@ -321,7 +314,6 @@ export default function TalentDiscoveryPage() {
             </div>
 
             <div className="space-y-4">
-              {/* Países */}
               <div>
                 <label className="mb-2 flex justify-between font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">
                   <span>Países</span> <span>{countryFilters.length}/3</span>
@@ -340,7 +332,6 @@ export default function TalentDiscoveryPage() {
                 </div>
               </div>
 
-              {/* Skills */}
               <div>
                 <label className="mb-2 flex justify-between font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">
                   <span>Skills</span> <span>{skillFilters.length}/3</span>
@@ -359,7 +350,6 @@ export default function TalentDiscoveryPage() {
                 </div>
               </div>
 
-              {/* Experiencia */}
               <div>
                 <label className="mb-2 block font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">Experiencia</label>
                 <select className="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 font-sans text-sm text-black focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white" value={experienceRange} onChange={(e) => setExperienceRange(e.target.value as ExperienceRange)}>
@@ -367,7 +357,6 @@ export default function TalentDiscoveryPage() {
                 </select>
               </div>
 
-              {/* Seniority */}
               <div>
                 <label className="mb-2 block font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">Nivel (Seniority)</label>
                 <select className="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 font-sans text-sm text-black focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white" value={seniority} onChange={(e) => setSeniority(e.target.value as SeniorityLevel | '')}>
@@ -375,7 +364,6 @@ export default function TalentDiscoveryPage() {
                 </select>
               </div>
 
-              {/* Estado */}
               <div>
                 <label className="mb-2 block font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">Disponibilidad</label>
                 <select className="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 font-sans text-sm text-black focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as StatusType)}>
@@ -383,7 +371,6 @@ export default function TalentDiscoveryPage() {
                 </select>
               </div>
 
-              {/* Tipo de Perfil */}
               <div>
                 <label className="mb-2 block font-sans text-[10px] font-bold uppercase tracking-wider text-gray-400">Tipo de Perfil</label>
                 <select className="w-full rounded-lg border border-gray-200 bg-gray-50 p-2 font-sans text-sm text-black focus:outline-none dark:border-white/10 dark:bg-white/5 dark:text-white" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as CategoryType)}>
@@ -402,7 +389,6 @@ export default function TalentDiscoveryPage() {
           </div>
         </aside>
 
-        {/* Grid Principal */}
         <main className="flex-1">
           {isLoading ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

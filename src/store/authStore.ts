@@ -20,6 +20,7 @@ interface AuthStore {
   error: string | null;
   login: (email: string, password: string, role?: UserRole) => Promise<LoginResult | null>;
   updateProfile: (data: Partial<User>) => Promise<void>;
+  fetchProfile: () => Promise<void>; // <-- Añadido al tipado
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   completeOAuthLogin: (args: {
@@ -58,8 +59,11 @@ export const useAuthStore = create<AuthStore>()(
 
           set({ user, isAuthenticated: true, loading: false });
 
+          // Una vez logueado, traemos la info completa del perfil desde la BD
+          await get().fetchProfile();
+
           return {
-            user,
+            user: get().user || user, // Devolvemos el usuario ya hidratado con la info de BD
             roleDisplayName: ROLE_DISPLAY_NAMES[user.role],
             redirectPath: ROLE_REDIRECT_PATHS[user.role],
           };
@@ -72,13 +76,34 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
+      fetchProfile: async () => {
+        const { user } = get();
+        if (!user) return;
+        try {
+          const dbData = await authService.getProfile(user.id);
+          set((state) => ({
+            user: state.user ? { ...state.user, ...dbData } : null,
+          }));
+        } catch (error) {
+          console.error('Error al sincronizar perfil con la BD', error);
+        }
+      },
+
       updateProfile: async (data: Partial<User>) => {
         const { user } = get();
         if (!user) return;
         set({ loading: true, error: null });
         try {
           const updatedUser = await authService.updateProfile(user.id, data);
-          set({ user: updatedUser, loading: false });
+          
+          set({ 
+            user: { 
+              ...user, 
+              ...(updatedUser || {}), 
+              ...data 
+            }, 
+            loading: false 
+          });
         } catch {
           set({ error: 'Error al actualizar perfil', loading: false });
         }
@@ -99,7 +124,11 @@ export const useAuthStore = create<AuthStore>()(
 
       checkAuth: async () => {
         const { user } = get();
-        if (user) set({ isAuthenticated: true });
+        if (user) {
+          set({ isAuthenticated: true });
+          // Opcional: Refrescar la info cada vez que se checa la autenticación
+          await get().fetchProfile();
+        }
       },
 
       completeOAuthLogin: ({ user, token, tokenType = 'Bearer', expiresIn }) => {
@@ -107,6 +136,8 @@ export const useAuthStore = create<AuthStore>()(
         localStorage.setItem(TOKEN_TYPE_KEY, tokenType);
         if (expiresIn) localStorage.setItem(EXPIRES_AT_KEY, String(Date.now() + expiresIn));
         set({ user, isAuthenticated: true, error: null, loading: false });
+        // También hidratamos si entra con Google/OAuth
+        get().fetchProfile();
       },
 
       switchRole: (role: UserRole) => {

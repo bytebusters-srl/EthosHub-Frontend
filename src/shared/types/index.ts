@@ -7,19 +7,19 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  avatar: string;
   username?: string;
+  avatar?: string;
+  bio?: string;
   role: UserRole;
-  slug: string;
-  profession: string;
-  bio: string;
+  slug?: string;
+  profession?: string;
   headline?: string;
-  location: string;
-  website: string;
-  company?: string;
-  createdAt: string;
+  location?: string;
+  // Campos añadidos para la sincronización con la DB
+  status?: string;    // Mapeado a core.availabilities.status [cite: 179]
+  seniority?: string; // Mapeado a core.profiles_basic.seniority [cite: 377]
+  createdAt?: string;
 }
-
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
