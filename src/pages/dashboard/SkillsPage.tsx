@@ -272,7 +272,7 @@ export default function SkillsPage() {
       )}
 
       {/* Top Skills Counter */}
-      <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20">
+      <Card className="border-2 border-yellow-400 hover:border-yellow-500">
         <CardContent className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <Star className="h-6 w-6 text-yellow-500" />
@@ -289,7 +289,7 @@ export default function SkillsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-yellow-500/20 bg-yellow-50/60 dark:bg-yellow-950/10">
+      <Card className="border-2 border-yellow-400 hover:border-yellow-500">
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
             <div>

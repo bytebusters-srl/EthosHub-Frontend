@@ -97,12 +97,12 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full">
-      <div className="mb-6">
+      <div className="mt-2 mb-1 pl-2">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-3 w-3" />
           Volver al inicio
         </Link>
       </div>
@@ -123,17 +123,17 @@ export default function RegisterPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-primary">Registro</p>
-              <h2 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
+              <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground">
                 Crear cuenta
               </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              <p className="mt-0.5 max-w-2xl text-sm leading-6 text-muted-foreground">
                 Solo necesitas un email y una contraseña segura para comenzar.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-6 px-5 py-6 sm:px-8 sm:py-8">
+        <div className="space-y-3 px-5 py-3 sm:px-6 sm:py-4">
           {/* Role Selection Cards */}
           <div className="grid grid-cols-2 gap-4">
             {/* Professional Card */}
@@ -229,10 +229,10 @@ export default function RegisterPage() {
             </p>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-2">
             {/* Email Field */}
             <div>
-              <label htmlFor="register-email" className="mb-2 block text-sm font-semibold text-foreground">
+              <label htmlFor="register-email" className="mb-1 block text-sm font-semibold text-foreground">
                 Email
               </label>
               <div className="relative">
@@ -244,7 +244,7 @@ export default function RegisterPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@email.com"
                   autoComplete="email"
-                  className="h-12 rounded-xl border-border bg-background pl-11 pr-4 transition-all focus:border-ethoshub-blue focus:ring-2 focus:ring-ethoshub-blue/20"
+                  className="h-10 rounded-xl border-border bg-background pl-11 pr-4 transition-all focus:border-ethoshub-blue focus:ring-2 focus:ring-ethoshub-blue/20"
                 />
               </div>
             </div>
@@ -280,7 +280,7 @@ export default function RegisterPage() {
             <PasswordStrengthIndicator password={password} />
 
             {/* Terms Checkbox */}
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm transition-colors hover:bg-muted/50">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm transition-colors hover:bg-muted/50">
               <input
                 type="checkbox"
                 checked={acceptedTerms}
@@ -307,14 +307,14 @@ export default function RegisterPage() {
               type="submit"
               loading={submitting}
               disabled={!isFormValid}
-              className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+              className="h-10 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
             >
               Crear cuenta
             </Button>
           </form>
 
           {/* Divider */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <div className="h-px flex-1 bg-border" />
             <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
               O regístrate con

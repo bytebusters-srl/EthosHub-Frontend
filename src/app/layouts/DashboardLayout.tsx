@@ -139,45 +139,31 @@ export function DashboardLayout() {
             <X className="h-5 w-5" />
           </button>
         </div>
-
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4">
-          <ul className="space-y-1">
-            {navItems.map((item) => {
-              // Verificamos si la ruta actual coincide O si empieza con la ruta del item (para que se mantenga marcado al navegar dentro de admin)
-              const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-              return (
-                <li key={item.path}>
-                  <Link
-                    to={item.path}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-violet-600 text-white shadow-md'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-black dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white'
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    {item.labelKey ? t(item.labelKey) : item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* User section */}
-        <div className="border-t border-gray-200 p-4 dark:border-white/10">
-          <div className="flex items-center gap-3">
-            <Avatar src={user?.avatar} alt={user?.name} fallback={user?.name} size="md" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-black dark:text-white">{user?.name}</p>
-              <p className="truncate text-xs text-gray-500 dark:text-gray-400">{user?.role === 'admin' ? 'Administrador' : user?.profession}</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
+<nav className="flex-1 overflow-y-auto p-4">
+  <ul className="space-y-1">
+    {navItems.map((item) => {
+      const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+      return (
+        <li key={item.path}>
+          <Link
+            to={item.path}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-violet-600 text-white shadow-md'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-black dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white'
+            )}
+          >
+            <item.icon className="h-5 w-5" />
+            {item.labelKey ? t(item.labelKey) : item.label}
+          </Link>
+        </li>
+      );
+    })}
+  </ul>
+</nav>
+</aside>
       {/* Overlay for mobile - z-60 */}
       {sidebarOpen && (
         <div
