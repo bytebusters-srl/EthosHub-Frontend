@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Building2, ChevronDown, ChevronUp, Save } from 'lucide-react';
 import { Card } from '@/shared/ui';
 
+
 // 🏢 Tarjeta para los datos de la Empresa (Alineado con perfiles_company)
 export function CompanyProfileCard() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -10,6 +11,8 @@ export function CompanyProfileCard() {
     industry: '',
     companySize: '',
     nit: '',
+    contactFirstName: '',
+    contactLastName: '',
     websiteUrl: '',
   });
 
@@ -97,6 +100,39 @@ export function CompanyProfileCard() {
                   onChange={(e) => setFormData({ ...formData, nit: e.target.value })}
                 />
               </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-black dark:text-white">Nombre del contacto</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Laura"
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-black focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+                  value={formData.contactFirstName}
+                  onChange={(e) => setFormData({ ...formData, contactFirstName: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-black dark:text-white">Apellido del contacto</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Torres"
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-black focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+                  value={formData.contactLastName}
+                  onChange={(e) => setFormData({ ...formData, contactLastName: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-black dark:text-white">Sitio web</label>
+              <input
+                type="url"
+                placeholder="https://miempresa.com"
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-black focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+                value={formData.websiteUrl}
+                onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
+              />
             </div>
 
             <div className="flex justify-end pt-2">
