@@ -20,6 +20,7 @@ type RegisterPrefills = {
   fromRegister?: boolean;
   fullName?: string;
 };
+
 const OAUTH_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
 
 export default function LoginPage() {
@@ -41,25 +42,30 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (!prefills) {
-      return;
-    }
+    if (!prefills) return;
 
-    if (prefills.email) {
-      setEmail(prefills.email);
-    }
-    if (prefills.password) {
-      setPassword(prefills.password);
-    }
+    if (prefills.email) setEmail(prefills.email);
+    if (prefills.password) setPassword(prefills.password);
   }, [prefills]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await login(email, password, 'professional');
+    
+    // Validación UI: Forzamos a elegir rol antes de mandar al backend
+    if (!selectedRole) {
+      setShowRoleRequiredMessage(true);
+      toast.error('Selecciona un rol', { description: 'Indica si eres Profesional o Reclutador.' });
+      return;
+    }
+
+    const roleToSend: UserRole = selectedRole === 'Reclutador' ? 'recruiter' : 'professional';
+    
+    // Llamada al store -> que llama al service -> que llama a Spring Boot
+    const result = await login(email, password, roleToSend);
     
     if (result) {
       toast.success(`Bienvenido de nuevo, ${result.roleDisplayName}`, {
-        description: 'Has iniciado sesion correctamente',
+        description: 'Has iniciado sesión correctamente',
         duration: 4000,
       });
 
@@ -68,10 +74,9 @@ export default function LoginPage() {
         return;
       }
 
-      // Navigate to role-specific path
       navigate(result.redirectPath);
     } else {
-      toast.error('No se pudo iniciar sesion', {
+      toast.error('No se pudo iniciar sesión', {
         description: 'Verifica tus credenciales e intenta nuevamente.',
       });
     }
@@ -105,8 +110,8 @@ export default function LoginPage() {
 
       <AuthHero
         eyebrow="Bienvenido de vuelta"
-        title="Inicia sesion en tu cuenta"
-        description="Accede a tu portafolio profesional y continua construyendo tu presencia digital."
+        title="Inicia sesión en tu cuenta"
+        description="Accede a tu portafolio profesional y continúa construyendo tu presencia digital."
       />
 
       <motion.section
@@ -120,7 +125,7 @@ export default function LoginPage() {
             <div>
               <p className="text-sm font-semibold text-primary">Acceso demo</p>
               <h2 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
-                Iniciar sesion
+                Iniciar sesión
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                 Usa las credenciales demo o ingresa las tuyas para continuar.
@@ -184,7 +189,7 @@ export default function LoginPage() {
 
           {!selectedRole && showRoleRequiredMessage && (
             <p className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
-              Debes seleccionar un rol antes de continuar con Google o GitHub.
+              Debes seleccionar un rol antes de continuar.
             </p>
           )}
 
@@ -203,6 +208,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@email.com"
                   className="h-12 rounded-xl border-border bg-background pl-11 pr-4 transition-all focus:border-ethoshub-blue focus:ring-2 focus:ring-ethoshub-blue/20"
+                  required
                 />
               </div>
             </div>
@@ -211,13 +217,13 @@ export default function LoginPage() {
             <div>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <label htmlFor="password" className="text-sm font-semibold text-foreground">
-                  Contrasena
+                  Contraseña
                 </label>
                 <Link
                   to="/forgot-password"
                   className="text-xs font-semibold text-primary transition-colors hover:text-primary/80"
                 >
-                  Olvidaste tu contrasena?
+                  ¿Olvidaste tu contraseña?
                 </Link>
               </div>
               <div className="relative">
@@ -227,12 +233,13 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Ingresa tu contrasena"
+                  placeholder="Ingresa tu contraseña"
                   className="h-12 rounded-xl border-border bg-background pl-11 pr-12 transition-all focus:border-ethoshub-blue focus:ring-2 focus:ring-ethoshub-blue/20"
+                  required
                 />
                 <button
                   type="button"
-                  aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   onClick={() => setShowPassword((value) => !value)}
                   className="absolute right-3 top-1/2 inline-flex -translate-y-1/2 cursor-pointer rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
@@ -247,34 +254,30 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Submit Button */}
             <Button
               type="submit"
               loading={loading}
               className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30"
             >
-              Iniciar sesion
+              Iniciar sesión
             </Button>
-
           </form>
 
-          {/* Divider */}
           <div className="flex items-center gap-4">
             <div className="h-px flex-1 bg-border" />
             <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              O continua con
+              O continúa con
             </span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          {/* Social Auth - At the bottom */}
           <SocialAuthGroup
             googleLabel="Continuar con Google"
             githubLabel="Continuar con GitHub"
             onProviderClick={handleOAuth}
           />
 
-          <AuthFooterLink prompt="No tienes cuenta?" cta="Crear cuenta" to="/register" />
+          <AuthFooterLink prompt="¿No tienes cuenta?" cta="Crear cuenta" to="/register" />
         </div>
       </motion.section>
     </div>

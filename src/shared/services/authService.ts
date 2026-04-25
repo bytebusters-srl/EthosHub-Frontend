@@ -2,27 +2,21 @@ import type { User, UserRole } from '@/shared/types';
 
 const API_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
 
+// Adaptado al ApiResponse de tu Spring Boot
 type ApiEnvelope<T> = {
-  success: boolean;
-  status: number;
+  code?: number;
+  status?: number;
+  success?: boolean;
   message: string;
   data?: T;
   errors?: string[];
 };
 
-type BackendAuthUser = {
-  id: string;
-  username: string;
-  email: string;
-  userType: string;
-};
-
+// Esta estructura DEBE coincidir con el AuthResponse.java de tu Backend
 type BackendAuthResponse = {
-  action: string;
   token: string;
-  tokenType: string;
-  expiresIn: number;
-  user: BackendAuthUser;
+  userId: string;
+  email: string;
 };
 
 type LoginApiResult = {
@@ -38,40 +32,9 @@ function mapRoleToBackend(role: UserRole): RegisterRole {
   return role === 'recruiter' ? 'RECRUITER' : 'PROFESSIONAL';
 }
 
-function mapUserTypeToRole(userType?: string): UserRole {
-  const normalized = (userType || '').toUpperCase();
-  if (normalized === 'RECLUTADOR' || normalized === 'RECRUITER') {
-    return 'recruiter';
-  }
-  if (normalized === 'ADMINISTRADOR' || normalized === 'ADMIN') {
-    return 'admin';
-  }
-  return 'professional';
-}
-
 function sanitizeSlug(value: string): string {
   const base = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   return base || `usuario-${Date.now()}`;
-}
-
-function buildUserFromAuth(authUser: BackendAuthUser): User {
-  const role = mapUserTypeToRole(authUser.userType);
-
-  return {
-    id: String(authUser.id),
-    email: authUser.email,
-    name: authUser.username,
-    username: authUser.username,
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authUser.email || authUser.username)}`,
-    role,
-    slug: sanitizeSlug(authUser.username),
-    profession: role === 'recruiter' ? 'Reclutador' : role === 'admin' ? 'Administrador' : 'Profesional',
-    bio: '',
-    headline: role === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
-    location: '',
-    website: '',
-    createdAt: new Date().toISOString(),
-  };
 }
 
 async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
@@ -85,8 +48,11 @@ async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
 
   const payload = (await response.json()) as ApiEnvelope<T>;
 
-  if (!response.ok || !payload.success) {
-    const details = payload.errors?.[0] || payload.message || 'Error de autenticacion';
+  // Tolerancia: Spring Boot suele usar código 200/201 en lugar de un booleano 'success'
+  const isSuccess = response.ok || payload.success === true || payload.code === 200 || payload.code === 201;
+
+  if (!isSuccess) {
+    const details = payload.errors?.[0] || payload.message || 'Error de autenticación';
     throw new Error(details);
   }
 
@@ -97,7 +63,6 @@ async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
   return payload.data;
 }
 
-// Role display names for toast messages
 export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
   professional: 'Profesional',
   recruiter: 'Reclutador',
@@ -105,7 +70,6 @@ export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
   guest: 'Invitado',
 };
 
-// Default redirect paths per role
 export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
   professional: '/dashboard',
   recruiter: '/dashboard',
@@ -113,24 +77,44 @@ export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
   guest: '/',
 };
 
-async function login(email: string, password: string): Promise<LoginApiResult> {
+// Se añadió 'role' para poder armar el usuario temporal en el front
+async function login(email: string, password: string, role: UserRole): Promise<LoginApiResult> {
   const normalizedEmail = email.toLowerCase().trim();
+  
+  // Enviamos 'email' y 'password' que es lo que espera LoginRequest en Java
   const authResponse = await requestJson<BackendAuthResponse>('/api/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ usernameOrEmail: normalizedEmail, password }),
+    body: JSON.stringify({ email: normalizedEmail, password }),
   });
 
+  // Construimos el User para Zustand con los datos que nos dio Java
+  const user: User = {
+    id: authResponse.userId,
+    email: authResponse.email,
+    name: authResponse.email.split('@')[0], // Nombre basado en email
+    username: authResponse.email.split('@')[0],
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authResponse.email)}`,
+    role: role,
+    slug: sanitizeSlug(authResponse.email.split('@')[0]),
+    profession: role === 'recruiter' ? 'Reclutador' : 'Profesional',
+    bio: '',
+    headline: role === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
+    location: '',
+    website: '',
+    createdAt: new Date().toISOString(),
+  };
+
   return {
-    user: buildUserFromAuth(authResponse.user),
+    user,
     token: authResponse.token,
-    tokenType: authResponse.tokenType,
-    expiresIn: authResponse.expiresIn,
+    tokenType: 'Bearer',
+    expiresIn: 86400, // 24hrs por defecto
   };
 }
 
 async function registerLocal(email: string, password: string, role: UserRole): Promise<void> {
   const normalizedEmail = email.toLowerCase().trim();
-  await requestJson('/api/v1/auth/register', {
+  await requestJson('/api/auth/register', { // Ajustado a la ruta de tu controlador
     method: 'POST',
     body: JSON.stringify({
       email: normalizedEmail,
@@ -140,14 +124,8 @@ async function registerLocal(email: string, password: string, role: UserRole): P
   });
 }
 
-/**
- * Update user profile
- */
 async function updateProfile(userId: string, data: Partial<User>): Promise<User> {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  
-  // In a real app, this would call an API
-  // For now, just return the merged data
   return {
     id: userId,
     email: data.email || '',
@@ -160,15 +138,11 @@ async function updateProfile(userId: string, data: Partial<User>): Promise<User>
     location: data.location || '',
     website: data.website || '',
     createdAt: data.createdAt || new Date().toISOString(),
-  };
+  } as User;
 }
 
-/**
- * Logout user
- */
 async function logout(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 300));
-  // Clear any session data
 }
 
 export const authService = {

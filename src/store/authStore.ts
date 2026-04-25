@@ -41,10 +41,12 @@ export const useAuthStore = create<AuthStore>()(
       loading: false,
       error: null,
 
-      login: async (email: string, password: string, _role: UserRole): Promise<LoginResult | null> => {
+      // Se removió el guion bajo a 'role' para usarlo activamente
+      login: async (email: string, password: string, role: UserRole): Promise<LoginResult | null> => {
         set({ loading: true, error: null });
         try {
-          const result = await authService.login(email, password);
+          // Pasamos el rol seleccionado al servicio
+          const result = await authService.login(email, password, role);
           const user = result.user;
 
           localStorage.setItem(ACCESS_TOKEN_KEY, result.token);
