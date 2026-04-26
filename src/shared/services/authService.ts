@@ -9,7 +9,7 @@ export type ProfileUpdatePayload = Partial<User> & {
   availabilityStatus?: string;
 };
 
-const API_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
+const API_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '');
 
 type ApiEnvelope<T> = {
   code?: number;
