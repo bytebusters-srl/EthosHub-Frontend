@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, User, Briefcase, Clock } from 'lucide-react';
+import { X, Upload, User, Check, ChevronDown, Briefcase, Clock } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { useAuthStore } from '@/store/authStore';
 
@@ -25,6 +25,8 @@ export function ProfileEditorModal({ isOpen, onClose }: ProfileEditorModalProps)
     availabilityStatus: user?.status || 'Disponible',
   });
 
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -43,6 +45,7 @@ export function ProfileEditorModal({ isOpen, onClose }: ProfileEditorModalProps)
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData((prev) => ({ ...prev, avatarPreview: reader.result as string }));
@@ -52,12 +55,13 @@ export function ProfileEditorModal({ isOpen, onClose }: ProfileEditorModalProps)
   };
 
   const handleSave = async () => {
+    // AQUÍ ESTÁ LA CORRECCIÓN:
+    // Mapeamos los campos EXACTAMENTE a como los espera tu interfaz 'User'
     const profileUpdates = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
+      name: `${formData.firstName} ${formData.lastName}`.trim(),
       bio: formData.bio,
-      photoUrl: formData.avatarPreview,
-      availabilityStatus: formData.availabilityStatus,
+      avatar: formData.avatarPreview,       // Antes decía photoUrl
+      status: formData.availabilityStatus,  // Antes decía availabilityStatus
       seniority: formData.seniority,
     };
 
