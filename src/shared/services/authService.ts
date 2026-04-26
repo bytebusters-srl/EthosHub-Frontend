@@ -6,6 +6,7 @@ export type ProfileUpdatePayload = Partial<User> & {
   photoUrl?: string;
   country?: string;
   phone?: string;
+  availabilityStatus?: string;
 };
 
 const API_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
@@ -85,13 +86,13 @@ export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
 
 async function login(email: string, password: string, role?: UserRole): Promise<LoginApiResult> {
   const normalizedEmail = email.toLowerCase().trim();
-  
+
   const authResponse = await requestJson<BackendAuthResponse>('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email: normalizedEmail, password }),
   });
 
-  let finalRole: UserRole = 'professional'; 
+  let finalRole: UserRole = 'professional';
 
   if (authResponse.role) {
     const backendRole = authResponse.role.toUpperCase();
@@ -140,7 +141,7 @@ async function registerLocal(email: string, password: string, role: UserRole): P
 
 async function getProfile(userId: string): Promise<Partial<User>> {
   const token = localStorage.getItem('ethoshub_access_token');
-  
+
   const response = await fetch(`${API_BASE_URL}/api/v1/profiles/${userId}`, {
     method: 'GET',
     headers: {
@@ -149,9 +150,9 @@ async function getProfile(userId: string): Promise<Partial<User>> {
   });
 
   if (!response.ok) throw new Error('No se pudo cargar el perfil');
-  
+
   const data = await response.json();
-  
+
   return {
     name: `${data.firstName} ${data.lastName}`.trim(),
     bio: data.bio,
@@ -201,7 +202,7 @@ async function updateProfile(userId: string, data: ProfileUpdatePayload): Promis
   } as User;
 }
 
-async function logout(): Promise<void> {}
+async function logout(): Promise<void> { }
 
 export const authService = {
   login,

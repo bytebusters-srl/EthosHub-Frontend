@@ -23,6 +23,8 @@ export interface User {
   seniority?: string; // Mapeado a core.profiles_basic.seniority [cite: 377]
   profile_id?: string; // ID del perfil en la tabla core.profiles
   createdAt?: string;
+  company?: string;
+  availabilityStatus?: string;
 }
 export interface AuthState {
   user: User | null;
@@ -35,11 +37,11 @@ export interface AuthState {
 // =============================================
 export type SkillLevel = 'Junior' | 'Mid' | 'Senior';
 
-export type SkillCategory = 
-  | 'Frontend' 
-  | 'Backend' 
-  | 'Bases de Datos' 
-  | 'Infraestructura' 
+export type SkillCategory =
+  | 'Frontend'
+  | 'Backend'
+  | 'Bases de Datos'
+  | 'Infraestructura'
   | 'Otras Tecnologías';
 
 export interface GlobalSkillTag {
@@ -55,7 +57,7 @@ export interface HardSkill {
   skillTag: GlobalSkillTag;
   level: SkillLevel;
   isTop: boolean;
-  topOrder?: number | null;
+  topOrder?: number;
   endorsements: Endorsement[];
   createdAt: string;
 }

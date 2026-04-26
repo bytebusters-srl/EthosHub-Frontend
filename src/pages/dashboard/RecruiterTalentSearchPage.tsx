@@ -69,12 +69,16 @@ const availabilityOptions = [
 
 const locationOptions = [
   { value: '', label: 'Todas las ubicaciones' },
-  ...Array.from(new Set(recruiterTalentProfiles.map((profile) => profile.user.location))).map(
-    (location) => ({
-      value: location,
-      label: location,
-    })
-  ),
+  ...Array.from(
+    new Set(
+      recruiterTalentProfiles
+        .map((profile) => profile.user.location)
+        .filter((loc): loc is string => !!loc) // Filtra valores undefined o vacíos
+    )
+  ).map((location) => ({
+    value: location,
+    label: location,
+  })),
 ];
 
 function normalizeText(value: string) {
@@ -104,8 +108,8 @@ function getCandidateMatches(candidate: (typeof recruiterTalentProfiles)[number]
     scope === 'soft'
       ? []
       : candidate.hardSkills.filter((skill) =>
-          normalizeText(`${skill.name} ${skill.category} ${skill.level}`).includes(normalizedQuery)
-        );
+        normalizeText(`${skill.name} ${skill.category} ${skill.level}`).includes(normalizedQuery)
+      );
   const softMatches =
     scope === 'hard'
       ? []
@@ -311,9 +315,9 @@ export default function RecruiterTalentSearchPage() {
 
       {/* Mobile Filter Button */}
       <div className="lg:hidden">
-        <Button 
+        <Button
           onClick={() => setShowMobileFilters(true)}
-          variant="outline" 
+          variant="outline"
           className="w-full gap-2 rounded-xl border border-gray-200 bg-white text-black dark:border-white/10 dark:bg-zinc-950 dark:text-white"
         >
           <SlidersHorizontal className="h-4 w-4" />
