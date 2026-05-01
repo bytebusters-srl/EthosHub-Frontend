@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store';
 import { Button } from '@/shared/ui';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { EthosCoreLogo } from '@/components/brand/EthosCoreLogo';
+import { EthosCoreLogo, EthosLogoIcon } from '@/components/brand/EthosCoreLogo';
 
 export function PublicPortfolioLayout() {
   const location = useLocation();
@@ -13,8 +13,16 @@ export function PublicPortfolioLayout() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b border-border/80 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/70">
         <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link to="/">
-            <EthosCoreLogo size="lg" />
+          
+          <Link to="/" className="shrink-0">
+            {/* EN MÓVILES: Mostramos solo el ícono (estilo LinkedIn) */}
+            <div className="sm:hidden">
+              <EthosLogoIcon size={32} />
+            </div>
+            {/* EN PC: Mostramos el logo completo con texto */}
+            <div className="hidden sm:block">
+              <EthosCoreLogo size="md" /> 
+            </div>
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
@@ -34,19 +42,24 @@ export function PublicPortfolioLayout() {
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            
             {isAuthenticated ? (
               <Link to="/dashboard">
-                <Button size="sm" className="rounded-xl px-5">Dashboard</Button>
+                <Button size="sm" className="whitespace-nowrap rounded-xl px-5">
+                  Dashboard
+                </Button>
               </Link>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="outline" size="sm" className="rounded-xl px-5">
+                  {/* Restauramos los botones originales y elegantes */}
+                  <Button variant="outline" size="sm" className="whitespace-nowrap rounded-xl px-4 sm:px-5">
                     Iniciar Sesión
                   </Button>
                 </Link>
                 <Link to="/register">
-                  <Button size="sm" className="rounded-xl bg-[linear-gradient(135deg,#635bff_0%,#4f46e5_100%)] px-5">
+                  {/* Restauramos los botones originales y elegantes */}
+                  <Button size="sm" className="whitespace-nowrap rounded-xl bg-[linear-gradient(135deg,#635bff_0%,#4f46e5_100%)] px-4 sm:px-5">
                     Crear Cuenta
                   </Button>
                 </Link>
@@ -65,15 +78,16 @@ export function PublicPortfolioLayout() {
           <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
             <div>
               <Link to="/">
+                {/* El logo del footer queda completo siempre */}
                 <EthosCoreLogo size="lg" />
               </Link>
               <p className="mt-4 max-w-sm text-sm leading-7 text-muted-foreground">
                 La plataforma para profesionales tech que quieren destacar.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
-                {['Bytebusters', '@bytebusters', '@bytebusters'].map((item) => (
+                {['Bytebusters', '@bytebusters', '@bytebusters'].map((item, i) => (
                   <div
-                    key={item}
+                    key={`${item}-${i}`}
                     className="rounded-xl border border-white/60 bg-white/80 px-4 py-2 text-sm text-foreground shadow-sm dark:border-slate-800 dark:bg-slate-900"
                   >
                     {item}
