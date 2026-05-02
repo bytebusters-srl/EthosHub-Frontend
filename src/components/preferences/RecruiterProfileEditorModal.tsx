@@ -11,13 +11,38 @@ const countries = [
   'Paraguay', 'Perú', 'República Dominicana', 'Uruguay', 'Venezuela',
 ];
 
+// Mapeo de países a country_id (ajusta los IDs según tu BD)
+// TODO: Verificar los IDs exactos en core.countries
+const COUNTRY_ID_MAP: Record<string, number> = {
+  'Argentina': 1,
+  'Bolivia': 2,
+  'Brasil': 3,
+  'Chile': 4,
+  'Colombia': 5,
+  'Costa Rica': 6,
+  'Cuba': 7,
+  'Ecuador': 8,
+  'El Salvador': 9,
+  'España': 10,
+  'Guatemala': 11,
+  'Honduras': 12,
+  'México': 13,
+  'Nicaragua': 14,
+  'Panamá': 15,
+  'Paraguay': 16,
+  'Perú': 17,
+  'República Dominicana': 18,
+  'Uruguay': 19,
+  'Venezuela': 20,
+};
+
 interface RecruiterProfileEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function RecruiterProfileEditorModal({ isOpen, onClose }: RecruiterProfileEditorModalProps) {
-  const { user, updateProfile, loading } = useAuthStore();
+  const { user, updateRecruiterIdentity, loading } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [countryOpen, setCountryOpen] = useState(false);
   const countryRef = useRef<HTMLDivElement>(null);
@@ -66,11 +91,31 @@ export function RecruiterProfileEditorModal({ isOpen, onClose }: RecruiterProfil
   };
 
   const handleSave = async () => {
-    await updateProfile({
+    // Validar que se haya seleccionado un país
+    if (!formData.country) {
+      alert('Por favor selecciona un país');
+      return;
+    }
+
+    const countryId = COUNTRY_ID_MAP[formData.country];
+    if (!countryId) {
+      alert('País no reconocido');
+      return;
+    }
+
+    // Validar que nombre y apellido no estén vacíos
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      alert('Por favor ingresa nombre y apellido');
+      return;
+    }
+
+    // Llamar a updateRecruiterIdentity con los datos correctos
+    await updateRecruiterIdentity({
       firstName: formData.firstName,
       lastName: formData.lastName,
       photoUrl: formData.avatarPreview,
       country: formData.country,
+      countryId: countryId,
       phone: formData.phone,
     });
     onClose();
