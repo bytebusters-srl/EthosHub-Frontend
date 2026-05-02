@@ -67,11 +67,15 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   addHardSkill: async (userId: string, tagId: string, level: SkillLevel) => {
     set({ loading: true });
     try {
+      console.log('🔵 addHardSkill START:', { userId, tagId, level });
       await api.post(`/users/${userId}/skills/hard`, { tagId, level });
       await get().fetchHardSkills(userId);
+      console.log('🟢 addHardSkill SUCCESS');
       set({ loading: false });
-    } catch (err) {
-      set({ error: 'Error al agregar skill', loading: false });
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('🔴 addHardSkill ERROR:', errorMsg);
+      set({ error: `Error al agregar skill: ${errorMsg}`, loading: false });
     }
   },
 
@@ -104,10 +108,14 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
 
   addSoftSkill: async (userId: string, title: string, description?: string) => {
     try {
+      console.log('🔵 addSoftSkill START:', { userId, title, description });
       await api.post(`/users/${userId}/skills/soft`, { title, description });
       await get().fetchSoftSkills(userId);
-    } catch (err) {
-      set({ error: 'Error al agregar soft skill' });
+      console.log('🟢 addSoftSkill SUCCESS');
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('🔴 addSoftSkill ERROR:', errorMsg);
+      set({ error: `Error al agregar soft skill: ${errorMsg}` });
     }
   },
 
@@ -144,9 +152,9 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
     } catch (err) {
         set({ error: 'Error al actualizar top skill', loading: false });
     }
-},
+  },
 
-reorderTopSkills: async (userId: string, skillIds: string[]) => {
+  reorderTopSkills: async (userId: string, skillIds: string[]) => {
     console.log('=== REORDER ===', { userId, skillIds }); // 👈 agrega esto
     set({ loading: true });
     try {
@@ -156,5 +164,5 @@ reorderTopSkills: async (userId: string, skillIds: string[]) => {
     } catch (err) {
         set({ error: 'Error al reordenar', loading: false });
     }
-},
+  },
 }));

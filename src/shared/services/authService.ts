@@ -18,6 +18,14 @@ type BackendAuthResponse = {
   profileId?: string;
 };
 
+type BackendApiResponse<T> = {
+  success: boolean;
+  status: number;
+  message: string;
+  data: T;
+  errors?: string[];
+};
+
 export type LoginApiResult = {
   user: User;
   token: string;
@@ -56,12 +64,15 @@ async function login(email: string, password: string, role?: UserRole): Promise<
   const normalizedEmail = email.toLowerCase().trim();
 
   // Axios ya maneja el JSON y el base_url
-  const response = await api.post<BackendAuthResponse>('/auth/login', { 
+  const response = await api.post<BackendApiResponse<BackendAuthResponse>>('/auth/login', { 
     email: normalizedEmail, 
     password 
   });
 
-  const authResponse = response.data;
+  const authResponse = response.data.data;
+  if (!authResponse?.token) {
+    throw new Error('La respuesta de login no incluyó token');
+  }
   let finalRole: UserRole = 'professional';
 
   if (authResponse.role) {

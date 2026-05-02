@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Creamos la instancia de axios con la URL de tu servidor de la U
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,21 +13,11 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    // 1. CAMBIO AQUÍ: Usamos la clave que vimos en tu LocalStorage
-    const authData = localStorage.getItem('ethoshub_auth'); 
-    
-    if (authData) {
-      try {
-        const parsed = JSON.parse(authData);
-        // 2. CAMBIO AQUÍ: Según tu estructura de Zustand, el token está en state.token
-        const token = parsed.state?.token; 
+    const token = localStorage.getItem('ethoshub_access_token');
+    const tokenType = localStorage.getItem('ethoshub_token_type') || 'Bearer';
 
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      } catch (error) {
-        console.error('Error al obtener el token del LocalStorage', error);
-      }
+    if (token) {
+      config.headers.Authorization = `${tokenType} ${token}`;
     }
     return config;
   },
