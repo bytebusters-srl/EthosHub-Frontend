@@ -65,13 +65,17 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   addHardSkill: async (userId: string, tagId: string, level: SkillLevel) => {
     set({ loading: true, error: null });
     try {
+      console.log('🔵 addHardSkill START:', { userId, tagId, level });
       const newSkill = await skillsService.addHardSkill(userId, tagId, level);
+      console.log('🟢 addHardSkill SUCCESS:', newSkill);
       set((state) => ({
         hardSkills: [...state.hardSkills, newSkill],
         loading: false,
       }));
-    } catch {
-      set({ error: 'Error al agregar skill', loading: false });
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('🔴 addHardSkill ERROR:', errorMsg);
+      set({ error: `Error al agregar skill: ${errorMsg}`, loading: false });
     }
   },
 
@@ -127,13 +131,17 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   addSoftSkill: async (userId: string, title: string, description?: string) => {
     set({ loading: true, error: null });
     try {
+      console.log('🔵 addSoftSkill START:', { userId, title, description });
       const newSkill = await skillsService.addSoftSkill(userId, title, description);
+      console.log('🟢 addSoftSkill SUCCESS:', newSkill);
       set((state) => ({
         softSkills: [...state.softSkills, newSkill],
         loading: false,
       }));
-    } catch {
-      set({ error: 'Error al agregar soft skill', loading: false });
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('🔴 addSoftSkill ERROR:', errorMsg);
+      set({ error: `Error al agregar soft skill: ${errorMsg}`, loading: false });
     }
   },
 
