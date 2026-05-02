@@ -32,7 +32,7 @@ const initialRecords: AcademicRecord[] = [
     id: '2',
     userId: 'user-1',
     institutionName: 'Platzi',
-    degree: 'Diplomado en Cloud Computing',
+    degree: 'Diplomado en Cloud Computing',  
     fieldOfStudy: 'AWS & DevOps',
     startDate: '2021-03-01',
     endDate: '2021-09-15',

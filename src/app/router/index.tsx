@@ -7,6 +7,7 @@ import { Skeleton } from '@/shared/ui';
 // Lazy loaded pages
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const OAuth2CallbackPage = lazy(() => import('@/pages/auth/OAuth2CallbackPage'));
 const HomePage = lazy(() => import('@/pages/public/HomePage'));
 const DashboardHomePage = lazy(() => import('@/pages/dashboard/DashboardHomePage'));
 const SkillsPage = lazy(() => import('@/pages/dashboard/SkillsPage'));
@@ -56,6 +57,22 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <RegisterPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'oauth2/callback',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <OAuth2CallbackPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'oauth-success',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <OAuth2CallbackPage />
           </Suspense>
         ),
       },
@@ -158,6 +175,17 @@ export const router = createBrowserRouter([
       },
     ],
   },
+
+  // 🔥 AÑADIDO: ruta directa para ver talentos sin login
+  {
+    path: '/talent',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <TalentDiscoveryPage />
+      </Suspense>
+    ),
+  },
+
   {
     element: (
       <ProtectedRoute allowedRoles={['admin']}>

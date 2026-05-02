@@ -219,10 +219,16 @@ export default function ProjectsPage() {
         title={t('projects.title')}
         description="Gestiona tu catálogo de proyectos y evidencias"
         action={
-          <Button onClick={() => setShowModal(true)}>
-            <Plus className="h-4 w-4" />
-            {t('projects.addProject')}
-          </Button>
+          
+  <Button
+    onClick={() => setShowModal(true)}
+    className="w-full justify-center gap-2 sm:w-auto sm:shrink-0"
+  >
+    <Plus className="h-4 w-4 shrink-0" />
+    <span className="whitespace-nowrap">
+      {t('projects.addProject')}
+    </span>
+  </Button>
         }
       />
 
