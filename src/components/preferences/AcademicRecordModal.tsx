@@ -188,9 +188,9 @@ export function AcademicRecordModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="rounded-2xl border border-border bg-card shadow-2xl">
+            <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -216,7 +216,7 @@ export function AcademicRecordModal({
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="max-h-[60vh] overflow-y-auto p-6">
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6">
                 <div className="space-y-4">
                   {/* Institution Name */}
                   <div className="space-y-2">
@@ -412,7 +412,7 @@ export function AcademicRecordModal({
               </form>
 
               {/* Footer */}
-              <div className="flex items-center justify-between border-t border-border px-6 py-4">
+              <div className="flex flex-col gap-3 border-t border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div>
                   {isEditMode && onDelete && (
                     <Button
@@ -426,7 +426,7 @@ export function AcademicRecordModal({
                     </Button>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                   <Button type="button" variant="ghost" onClick={onClose}>
                     Cancelar
                   </Button>

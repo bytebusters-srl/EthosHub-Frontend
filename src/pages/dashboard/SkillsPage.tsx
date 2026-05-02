@@ -239,15 +239,20 @@ export default function SkillsPage() {
         title={t('skills.title')}
         description="Gestiona tus habilidades técnicas y soft skills"
         action={
-          <div className="flex gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             <Button
               variant="outline"
               onClick={() => setShowSoftSkillModal(true)}
+              className="w-full justify-center sm:w-auto"
             >
               <Plus className="h-4 w-4" />
               Soft Skill
             </Button>
-            <Button onClick={() => setShowAddModal(true)}>
+
+            <Button
+              onClick={() => setShowAddModal(true)}
+              className="w-full justify-center sm:w-auto"
+            >
               <Plus className="h-4 w-4" />
               Hard Skill
             </Button>
@@ -432,11 +437,10 @@ export default function SkillsPage() {
                               className="rounded-lg p-2 hover:bg-accent"
                             >
                               <Star
-                                className={`h-4 w-4 ${
-                                  skill.isTop
+                                className={`h-4 w-4 ${skill.isTop
                                     ? 'fill-yellow-500 text-yellow-500'
                                     : 'text-muted-foreground'
-                                }`}
+                                  }`}
                               />
                             </button>
                           </Tooltip>
@@ -550,11 +554,10 @@ export default function SkillsPage() {
                 <button
                   key={tag.id}
                   onClick={() => setSelectedTag(tag)}
-                  className={`w-full rounded-lg px-3 py-2 text-left transition-colors ${
-                    selectedTag?.id === tag.id
+                  className={`w-full rounded-lg px-3 py-2 text-left transition-colors ${selectedTag?.id === tag.id
                       ? 'bg-primary text-primary-foreground'
                       : 'hover:bg-accent'
-                  }`}
+                    }`}
                 >
                   <p className="font-medium">{tag.name}</p>
                   <p className="text-xs opacity-70">{tag.category}</p>
