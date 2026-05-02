@@ -20,6 +20,7 @@ interface AuthStore {
   error: string | null;
   login: (email: string, password: string, role?: UserRole) => Promise<LoginResult | null>;
   updateProfile: (data: ProfileUpdatePayload) => Promise<void>;
+  updateRecruiterIdentity: (data: { firstName: string; lastName: string; country?: string; countryId?: number; phone?: string; photoUrl?: string }) => Promise<void>;
   syncUser: (data: Partial<User>) => void;
   fetchProfile: () => Promise<void>;
   logout: () => Promise<void>;
@@ -101,9 +102,17 @@ export const useAuthStore = create<AuthStore>()(
       updateProfile: async (data: ProfileUpdatePayload) => {
         const { user } = get();
         if (!user) return;
+        
+        // Usar profile_id, no user id
+        if (!user.profile_id) {
+          console.error('El usuario no tiene un profile_id asociado');
+          set({ error: 'No se encontró el ID de perfil', loading: false });
+          return;
+        }
+        
         set({ loading: true, error: null });
         try {
-          const updatedUser = await authService.updateProfile(user.id, data);
+          const updatedUser = await authService.updateProfile(user.profile_id, data);
           
           set({ 
             user: { 
@@ -119,6 +128,44 @@ export const useAuthStore = create<AuthStore>()(
           });
         } catch {
           set({ error: 'Error al actualizar perfil', loading: false });
+        }
+      },
+
+      updateRecruiterIdentity: async (data) => {
+        const { user } = get();
+        if (!user) return;
+        
+        if (!user.profile_id) {
+          console.error('El usuario no tiene un profile_id asociado');
+          set({ error: 'No se encontró el ID de perfil', loading: false });
+          return;
+        }
+        
+        set({ loading: true, error: null });
+        try {
+          await authService.updateRecruiterIdentity(user.profile_id, {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            countryId: data.countryId,
+            phoneNumber: data.phone,
+            photoUrl: data.photoUrl,
+          });
+          
+          set({ 
+            user: { 
+              ...user,
+              name: `${data.firstName} ${data.lastName}`.trim(),
+              avatar: data.photoUrl || user.avatar,
+              location: data.country || user.location,
+              phone: data.phone || user.phone,
+            }, 
+            loading: false 
+          });
+        } catch (error) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Error al actualizar identidad', 
+            loading: false 
+          });
         }
       },
 
