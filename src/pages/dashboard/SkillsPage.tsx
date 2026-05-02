@@ -132,12 +132,13 @@ export default function SkillsPage() {
   };
 
   const handleToggleTop = async (skillId: string) => {
+    if (!user) return;
     try {
-      if (!user) return;
       await toggleTopSkill(user.id, skillId);
-      await fetchHardSkills(user.id);
-    } catch {
-      addToast({ type: 'error', title: t('skills.maxTopSkills') });
+      // Opcional: podrías refrescar la lista si el backend hiciera algo
+      // await fetchHardSkills(user.id); 
+    } catch (error) {
+      addToast({ type: 'error', title: 'Error al marcar como favorita' });
     }
   };
 
@@ -197,15 +198,20 @@ export default function SkillsPage() {
     if (!deleteConfirm) return;
     if (!user) return;
 
-    if (deleteConfirm.type === 'hard') {
-      await removeHardSkill(deleteConfirm.id);
-      await fetchHardSkills(user.id);
-    } else {
-      await removeSoftSkill(deleteConfirm.id);
+    try {
+      if (deleteConfirm.type === 'hard') {
+        // CORRECCIÓN: Ahora pasamos user.id y el id de la skill
+        await removeHardSkill(user.id, deleteConfirm.id);
+      } else {
+        // CORRECCIÓN: Ahora pasamos user.id y el id de la skill
+        await removeSoftSkill(user.id, deleteConfirm.id);
+      }
+      addToast({ type: 'success', title: 'Habilidad eliminada' });
+    } catch (error) {
+      addToast({ type: 'error', title: 'No se pudo eliminar la habilidad' });
+    } finally {
+      setDeleteConfirm(null);
     }
-
-    addToast({ type: 'success', title: 'Habilidad eliminada' });
-    setDeleteConfirm(null);
   };
 
   const handleCompleteOnboarding = () => {

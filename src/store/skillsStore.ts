@@ -1,34 +1,35 @@
 import { create } from 'zustand';
-import type { HardSkill, SoftSkill, GlobalSkillTag, SkillLevel } from '@/shared/types';
-import { skillsService } from '@/shared/services';
+import api from '@/shared/api/api'; // Ruta corregida según tu proyecto
+import type { HardSkill, SoftSkill, GlobalSkillTag, SkillLevel, SkillCategory } from '@/shared/types';
 
 interface SkillsStore {
   hardSkills: HardSkill[];
   softSkills: SoftSkill[];
-  globalTags: GlobalSkillTag[];
   searchResults: GlobalSkillTag[];
   loading: boolean;
   error: string | null;
+  
+  // Acciones
   fetchHardSkills: (userId: string) => Promise<void>;
   fetchSoftSkills: (userId: string) => Promise<void>;
   searchTags: (query: string) => Promise<void>;
   addHardSkill: (userId: string, tagId: string, level: SkillLevel) => Promise<void>;
-  createTag: (name: string, category: string) => Promise<GlobalSkillTag>;
-  removeHardSkill: (skillId: string) => Promise<void>;
+  removeHardSkill: (userId: string, skillId: string) => Promise<void>;
+  addSoftSkill: (userId: string, title: string, description?: string) => Promise<void>;
+  removeSoftSkill: (userId: string, skillId: string) => Promise<void>;
+  
+  // OPCIÓN A: Usando el tipo SkillCategory explícitamente
+  createTag: (name: string, category: SkillCategory) => Promise<GlobalSkillTag>;
+  updateSoftSkill: (skillId: string, title: string, description?: string) => Promise<void>;
+
+  // Placeholders
   toggleTopSkill: (userId: string, skillId: string) => Promise<void>;
   reorderTopSkills: (userId: string, skillIds: string[]) => Promise<void>;
-  toggleEndorsement: (skillId: string, endorserId: string, endorserName: string, endorserAvatar: string) => Promise<void>;
-  addSoftSkill: (userId: string, title: string, description?: string) => Promise<void>;
-  updateSoftSkill: (skillId: string, title: string, description?: string) => Promise<void>;
-  removeSoftSkill: (skillId: string) => Promise<void>;
-  fetchAllTags: () => Promise<void>;
-  mergeTags: (sourceIds: string[], targetId: string) => Promise<void>;
 }
 
 export const useSkillsStore = create<SkillsStore>((set, get) => ({
   hardSkills: [],
   softSkills: [],
-  globalTags: [],
   searchResults: [],
   loading: false,
   error: null,
@@ -36,9 +37,9 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   fetchHardSkills: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const hardSkills = await skillsService.getHardSkills(userId);
-      set({ hardSkills, loading: false });
-    } catch {
+      const response = await api.get(`/users/${userId}/skills/hard`);
+      set({ hardSkills: response.data.data || [], loading: false });
+    } catch (err) {
       set({ error: 'Error al cargar habilidades', loading: false });
     }
   },
@@ -46,147 +47,94 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   fetchSoftSkills: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const softSkills = await skillsService.getSoftSkills(userId);
-      set({ softSkills, loading: false });
-    } catch {
+      const response = await api.get(`/users/${userId}/skills/soft`);
+      set({ softSkills: response.data.data || [], loading: false });
+    } catch (err) {
       set({ error: 'Error al cargar soft skills', loading: false });
     }
   },
 
   searchTags: async (query: string) => {
+    if (!query) return set({ searchResults: [] });
     try {
-      const searchResults = await skillsService.searchTags(query);
-      set({ searchResults });
+      const response = await api.get(`/skills/tags?query=${query}`);
+      set({ searchResults: response.data.data || [] });
     } catch {
       set({ searchResults: [] });
     }
   },
 
   addHardSkill: async (userId: string, tagId: string, level: SkillLevel) => {
-    set({ loading: true, error: null });
+    set({ loading: true });
     try {
-      const newSkill = await skillsService.addHardSkill(userId, tagId, level);
-      set((state) => ({
-        hardSkills: [...state.hardSkills, newSkill],
-        loading: false,
-      }));
-    } catch {
+      await api.post(`/users/${userId}/skills/hard`, { tagId, level });
+      await get().fetchHardSkills(userId);
+      set({ loading: false });
+    } catch (err) {
       set({ error: 'Error al agregar skill', loading: false });
     }
   },
 
-  createTag: async (name: string, category: string) => {
-    const newTag = await skillsService.createTag(name, category);
-    set((state) => ({
-      globalTags: [...state.globalTags, newTag],
-      searchResults: [...state.searchResults, newTag],
+  // OPCIÓN A: Implementación con tipo estricto
+  createTag: async (name: string, category: SkillCategory) => {
+    const newTag: GlobalSkillTag = { 
+      id: crypto.randomUUID(), 
+      name, 
+      category,
+      isNormalized: false // <-- Agregamos esto para cumplir con la interfaz
+    };
+    
+    set((state) => ({ 
+      searchResults: [...state.searchResults, newTag] 
     }));
+    
     return newTag;
   },
 
-  removeHardSkill: async (skillId: string) => {
-    set({ loading: true, error: null });
+  removeHardSkill: async (userId: string, skillId: string) => {
     try {
-      await skillsService.removeHardSkill(skillId);
+      await api.delete(`/users/${userId}/skills/hard/${skillId}`);
       set((state) => ({
         hardSkills: state.hardSkills.filter((s) => s.id !== skillId),
-        loading: false,
       }));
-    } catch {
-      set({ error: 'Error al eliminar skill', loading: false });
-    }
-  },
-
-  toggleTopSkill: async (userId: string, skillId: string) => {
-    try {
-      await skillsService.toggleTopSkill(skillId);
-      void userId;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  reorderTopSkills: async (userId: string, skillIds: string[]) => {
-    try {
-      const hardSkills = await skillsService.reorderTopSkills(userId, skillIds);
-      set({ hardSkills });
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  toggleEndorsement: async (skillId: string, endorserId: string, endorserName: string, endorserAvatar: string) => {
-    try {
-      await skillsService.toggleEndorsement(skillId, endorserId, endorserName, endorserAvatar);
-      await get().fetchHardSkills(get().hardSkills[0]?.userId || '1');
-    } catch {
-      set({ error: 'Error al validar skill' });
+    } catch (err) {
+      set({ error: 'No se pudo eliminar la habilidad' });
     }
   },
 
   addSoftSkill: async (userId: string, title: string, description?: string) => {
-    set({ loading: true, error: null });
     try {
-      const newSkill = await skillsService.addSoftSkill(userId, title, description);
-      set((state) => ({
-        softSkills: [...state.softSkills, newSkill],
-        loading: false,
-      }));
-    } catch {
-      set({ error: 'Error al agregar soft skill', loading: false });
+      await api.post(`/users/${userId}/skills/soft`, { title, description });
+      await get().fetchSoftSkills(userId);
+    } catch (err) {
+      set({ error: 'Error al agregar soft skill' });
     }
   },
 
   updateSoftSkill: async (skillId: string, title: string, description?: string) => {
-    set({ loading: true, error: null });
     try {
-      const updatedSkill = await skillsService.updateSoftSkill(skillId, title, description);
+      await api.put(`/users/skills/soft/${skillId}`, { title, description });
       set((state) => ({
-        softSkills: state.softSkills.map((s) =>
-          s.id === skillId ? updatedSkill : s
+        softSkills: state.softSkills.map((s) => 
+          s.id === skillId ? { ...s, title, description: description || '' } : s
         ),
-        loading: false,
       }));
-    } catch {
-      set({ error: 'Error al actualizar soft skill', loading: false });
+    } catch (err) {
+      set({ error: 'Error al actualizar soft skill' });
     }
   },
 
-  removeSoftSkill: async (skillId: string) => {
-    set({ loading: true, error: null });
+  removeSoftSkill: async (userId: string, skillId: string) => {
     try {
-      await skillsService.removeSoftSkill(skillId);
+      await api.delete(`/users/${userId}/skills/soft/${skillId}`);
       set((state) => ({
         softSkills: state.softSkills.filter((s) => s.id !== skillId),
-        loading: false,
       }));
-    } catch {
-      set({ error: 'Error al eliminar soft skill', loading: false });
+    } catch (err) {
+      set({ error: 'Error al eliminar soft skill' });
     }
   },
 
-  fetchAllTags: async () => {
-    set({ loading: true, error: null });
-    try {
-      const globalTags = await skillsService.getAllTags();
-      set({ globalTags, loading: false });
-    } catch {
-      set({ error: 'Error al cargar tags', loading: false });
-    }
-  },
-
-  mergeTags: async (sourceIds: string[], targetId: string) => {
-    set({ loading: true, error: null });
-    try {
-      await skillsService.mergeTags(sourceIds, targetId);
-      set((state) => ({
-        globalTags: state.globalTags.filter(
-          (t) => !sourceIds.includes(t.id) || t.id === targetId
-        ),
-        loading: false,
-      }));
-    } catch {
-      set({ error: 'Error al fusionar tags', loading: false });
-    }
-  },
+  toggleTopSkill: async () => {},
+  reorderTopSkills: async () => {},
 }));
