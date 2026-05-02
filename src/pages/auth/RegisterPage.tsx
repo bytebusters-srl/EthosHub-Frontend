@@ -15,7 +15,9 @@ import {
 import { PasswordStrengthIndicator, usePasswordValidation } from '@/components/auth/PasswordStrengthIndicator';
 import { TermsModal } from '@/components/auth/TermsModal';
 
-const OAUTH_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
+const OAUTH_BASE_URL = (((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL
+  || ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_URL)
+  || 'http://localhost:8080')).replace(/\/$/, '');
 
 export default function RegisterPage() {
   const navigate = useNavigate();

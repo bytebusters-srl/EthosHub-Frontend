@@ -1,4 +1,5 @@
 import type { User, UserRole } from '@/shared/types';
+import api from '@/shared/api/api'; // <--- Importamos tu nueva configuración de Axios
 
 export type ProfileUpdatePayload = Partial<User> & {
   firstName?: string;
@@ -7,17 +8,6 @@ export type ProfileUpdatePayload = Partial<User> & {
   country?: string;
   phone?: string;
   availabilityStatus?: string;
-};
-
-const API_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '');
-
-type ApiEnvelope<T> = {
-  code?: number;
-  status?: number;
-  success?: boolean;
-  message: string;
-  data?: T;
-  errors?: string[];
 };
 
 type BackendAuthResponse = {
@@ -46,30 +36,6 @@ function sanitizeSlug(value: string): string {
   return base || `usuario-${Date.now()}`;
 }
 
-async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init.headers || {}),
-    },
-    ...init,
-  });
-
-  const payload = (await response.json()) as ApiEnvelope<T>;
-  const isSuccess = response.ok || payload.success === true || payload.code === 200 || payload.code === 201;
-
-  if (!isSuccess) {
-    const details = payload.errors?.[0] || payload.message || 'Error de autenticación';
-    throw new Error(details);
-  }
-
-  if (!payload.data) {
-    throw new Error('Respuesta del servidor sin datos');
-  }
-
-  return payload.data;
-}
-
 export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
   professional: 'Profesional',
   recruiter: 'Reclutador',
@@ -84,14 +50,18 @@ export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
   guest: '/',
 };
 
+// --- FUNCIONES DEL SERVICIO USANDO AXIOS (api) ---
+
 async function login(email: string, password: string, role?: UserRole): Promise<LoginApiResult> {
   const normalizedEmail = email.toLowerCase().trim();
 
-  const authResponse = await requestJson<BackendAuthResponse>('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email: normalizedEmail, password }),
+  // Axios ya maneja el JSON y el base_url
+  const response = await api.post<BackendAuthResponse>('/auth/login', { 
+    email: normalizedEmail, 
+    password 
   });
 
+  const authResponse = response.data;
   let finalRole: UserRole = 'professional';
 
   if (authResponse.role) {
@@ -129,32 +99,21 @@ async function login(email: string, password: string, role?: UserRole): Promise<
 
 async function registerLocal(email: string, password: string, role: UserRole): Promise<void> {
   const normalizedEmail = email.toLowerCase().trim();
-  await requestJson('/api/auth/register', {
-    method: 'POST',
-    body: JSON.stringify({
-      email: normalizedEmail,
-      password,
-      role: mapRoleToBackend(role),
-    }),
+  await api.post('/auth/register', {
+    email: normalizedEmail,
+    password,
+    role: mapRoleToBackend(role),
   });
 }
 
 async function getProfile(userId: string): Promise<Partial<User>> {
-  const token = localStorage.getItem('ethoshub_access_token');
-
-  const response = await fetch(`${API_BASE_URL}/api/v1/profiles/${userId}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) throw new Error('No se pudo cargar el perfil');
-
-  const data = await response.json();
+  // Nota: Ya NO necesitas sacar el token de localStorage ni ponerlo en headers.
+  // El interceptor de Axios en api.ts lo hace solo.
+  const response = await api.get(`/profiles/${userId}`);
+  const data = response.data;
 
   return {
-    name: `${data.firstName} ${data.lastName}`.trim(),
+    name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
     bio: data.bio,
     avatar: data.photoUrl,
     location: data.country,
@@ -165,33 +124,17 @@ async function getProfile(userId: string): Promise<Partial<User>> {
 }
 
 async function updateProfile(userId: string, data: ProfileUpdatePayload): Promise<User> {
-  const token = localStorage.getItem('ethoshub_access_token');
-
-  if (!token) {
-    throw new Error('No hay token de sesión activo. Debes iniciar sesión de nuevo.');
-  }
-
-  const response = await fetch(`${API_BASE_URL}/api/v1/profiles/${userId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      firstName: data.firstName || data.name?.split(' ')[0] || '',
-      lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
-      bio: data.bio || '',
-      photoUrl: data.photoUrl || data.avatar || '',
-      country: data.country || data.location || '',
-      phone: data.phone || '',
-      availabilityStatus: data.availabilityStatus || data.status || 'Disponible',
-      seniority: data.seniority || 'Junior'
-    })
+  // Nota: El interceptor inyecta el token automáticamente.
+  const response = await api.put(`/profiles/${userId}`, {
+    firstName: data.firstName || data.name?.split(' ')[0] || '',
+    lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
+    bio: data.bio || '',
+    photoUrl: data.photoUrl || data.avatar || '',
+    country: data.country || data.location || '',
+    phone: data.phone || '',
+    availabilityStatus: data.availabilityStatus || data.status || 'Disponible',
+    seniority: data.seniority || 'Junior'
   });
-
-  if (!response.ok) {
-    throw new Error(`Fallo al comunicarse con el servidor: Error ${response.status}`);
-  }
 
   return {
     id: userId,
@@ -202,7 +145,9 @@ async function updateProfile(userId: string, data: ProfileUpdatePayload): Promis
   } as User;
 }
 
-async function logout(): Promise<void> { }
+async function logout(): Promise<void> {
+  // Aquí podrías llamar a un endpoint de logout si fuera necesario
+}
 
 export const authService = {
   login,
