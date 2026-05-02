@@ -67,8 +67,8 @@ export default function LoginPage() {
   };
 
   const handleOAuth = (provider: 'google' | 'github') => {
-    const selectedRole = prefills?.role === 'recruiter' ? 'RECRUITER' : 'PROFESSIONAL';
-    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/${provider}?role=${selectedRole}`;
+    const selectedRole = prefills?.role ? `?role=${prefills.role.toUpperCase()}` : '';
+    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/${provider}${selectedRole}`;
   };
 
   return (
