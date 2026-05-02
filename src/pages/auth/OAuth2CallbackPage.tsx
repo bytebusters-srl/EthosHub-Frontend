@@ -6,10 +6,10 @@ import type { User, UserRole } from '@/shared/types';
 import { ROLE_REDIRECT_PATHS } from '@/shared/services/authService';
 
 type JwtPayload = {
-  userId?: string; // Cambiado a string obligatoriamente para soportar UUID
+  userId?: string; 
   email?: string;
   username?: string;
-  userType?: string; // RECLUTADOR, PROFESIONAL, ADMINISTRADOR
+  userType?: string; 
   exp?: number;
 };
 
@@ -32,7 +32,6 @@ function decodeJwtPayload(token: string): JwtPayload | null {
 }
 
 function mapUserTypeToRole(userType?: string): UserRole {
-  // Coincidiendo con los nombres que vienen de la BD de la U
   const type = userType?.toUpperCase();
   if (type === 'RECLUTADOR' || type === 'RECRUITER') return 'recruiter';
   if (type === 'ADMINISTRADOR' || type === 'ADMIN') return 'admin';
@@ -45,18 +44,22 @@ function sanitizeSlug(value: string): string {
 }
 
 function buildUserFromToken(payload: JwtPayload): User {
+  if (!payload.userId) {
+    throw new Error('El token recibido no contiene un identificador válido (UUID).');
+  }
+
   const email = payload.email || '';
-  const username = payload.username || (email.includes('@') ? email.split('@')[0] : 'oauth-user');
+  const displayName = payload.username || (email.includes('@') ? email.split('@')[0] : 'oauth-user');
   const role = mapUserTypeToRole(payload.userType);
 
   return {
-    id: payload.userId || `oauth-${Date.now()}`, // Aquí llega el UUID de PostgreSQL
+    id: payload.userId, 
     email,
-    name: username,
-    username,
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email || username)}`,
+    name: displayName,
+    username: displayName.toLowerCase().replace(/\s+/g, ''),
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
     role,
-    slug: sanitizeSlug(username),
+    slug: sanitizeSlug(displayName),
     profession: role === 'recruiter' ? 'Reclutador' : role === 'admin' ? 'Administrador' : 'Profesional',
     bio: '',
     headline: role === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
@@ -94,28 +97,36 @@ export default function OAuth2CallbackPage() {
       return;
     }
 
-    const user = buildUserFromToken(payload);
+    try {
+      const user = buildUserFromToken(payload);
 
-    // Guardamos en el Store (Zustand)
-    completeOAuthLogin({
-      user,
-      token,
-      tokenType: 'Bearer',
-    });
+      completeOAuthLogin({
+        user,
+        token,
+        tokenType: 'Bearer',
+      });
 
-    toast.success('Sesión iniciada correctamente', {
-      description: `Bienvenido, ${user.name}`,
-    });
+      toast.success('Sesión iniciada correctamente', {
+        description: `Bienvenido, ${user.name}`,
+      });
 
-    // Redirigir según el rol (Dashboard reclutador o Perfil profesional)
-    navigate(ROLE_REDIRECT_PATHS[user.role], { replace: true });
+      navigate(ROLE_REDIRECT_PATHS[user.role], { replace: true });
+    } catch (err) {
+      console.error("Error crítico en OAuth Callback:", err);
+      toast.error('Error de autenticación', { 
+        description: err instanceof Error ? err.message : 'Token corrupto' 
+      });
+      const logout = useAuthStore.getState().logout;
+      if (logout) logout();
+      navigate('/login', { replace: true });
+    }
   }, [completeOAuthLogin, navigate, searchParams]);
 
   return (
     <div className="flex min-h-[45vh] items-center justify-center px-6 text-center">
       <div className="animate-pulse">
         <h1 className="text-2xl font-bold text-foreground">Procesando inicio de sesión...</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Conectando con el servidor de la universidad.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Conectando con el servidor...</p>
       </div>
     </div>
   );
