@@ -21,7 +21,7 @@ interface AuthStore {
   login: (email: string, password: string, role?: UserRole) => Promise<LoginResult | null>;
   updateProfile: (data: ProfileUpdatePayload) => Promise<void>;
   syncUser: (data: Partial<User>) => void;
-  fetchProfile: () => Promise<void>; // <-- Añadido al tipado
+  fetchProfile: () => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   completeOAuthLogin: (args: {
@@ -47,7 +47,15 @@ export const useAuthStore = create<AuthStore>()(
         set({ loading: true, error: null });
         try {
           const result = await authService.login(email, password, role);
-          const user = result.user;
+          
+          // 🔥 NORMALIZACIÓN A PRUEBA DE BALAS
+          // Si el back manda 'ADMIN', 'Administrador', etc, lo pasamos a 'admin'
+          const rawRole = (result.user?.role || '').toLowerCase();
+          const normalizedRole: UserRole = rawRole.includes('admin') ? 'admin' 
+                                         : rawRole.includes('rec') || rawRole.includes('reclutador') ? 'recruiter' 
+                                         : 'professional';
+          
+          const user = { ...result.user, role: normalizedRole };
 
           localStorage.setItem(ACCESS_TOKEN_KEY, result.token);
           localStorage.setItem(TOKEN_TYPE_KEY, result.tokenType || 'Bearer');
@@ -60,15 +68,15 @@ export const useAuthStore = create<AuthStore>()(
 
           set({ user, isAuthenticated: true, loading: false });
 
-          // Una vez logueado, traemos la info completa del perfil desde la BD
           await get().fetchProfile();
 
           return {
-            user: get().user || user, // Devolvemos el usuario ya hidratado con la info de BD
-            roleDisplayName: ROLE_DISPLAY_NAMES[user.role],
-            redirectPath: ROLE_REDIRECT_PATHS[user.role],
+            user: get().user || user,
+            roleDisplayName: ROLE_DISPLAY_NAMES[normalizedRole] || 'Usuario',
+            redirectPath: ROLE_REDIRECT_PATHS[normalizedRole] || '/dashboard',
           };
         } catch (error) {
+          console.error("🔥 Error real de Login:", error);
           set({
             error: error instanceof Error ? error.message : 'Error al iniciar sesión',
             loading: false,
@@ -137,7 +145,6 @@ export const useAuthStore = create<AuthStore>()(
         const { user } = get();
         if (user) {
           set({ isAuthenticated: true });
-          // Opcional: Refrescar la info cada vez que se checa la autenticación
           await get().fetchProfile();
         }
       },
@@ -146,8 +153,11 @@ export const useAuthStore = create<AuthStore>()(
         localStorage.setItem(ACCESS_TOKEN_KEY, token);
         localStorage.setItem(TOKEN_TYPE_KEY, tokenType);
         if (expiresIn) localStorage.setItem(EXPIRES_AT_KEY, String(Date.now() + expiresIn));
-        set({ user, isAuthenticated: true, error: null, loading: false });
-        // También hidratamos si entra con Google/OAuth
+        
+        const rawRole = (user.role || '').toLowerCase();
+        const normalizedRole: UserRole = rawRole.includes('admin') ? 'admin' : (rawRole as UserRole);
+        
+        set({ user: { ...user, role: normalizedRole }, isAuthenticated: true, error: null, loading: false });
         get().fetchProfile();
       },
 
@@ -158,12 +168,14 @@ export const useAuthStore = create<AuthStore>()(
 
       getRoleDisplayName: () => {
         const { user } = get();
-        return user ? ROLE_DISPLAY_NAMES[user.role] : 'Invitado';
+        if (!user) return 'Invitado';
+        return ROLE_DISPLAY_NAMES[user.role] || 'Usuario';
       },
 
       getRedirectPath: () => {
         const { user } = get();
-        return user ? ROLE_REDIRECT_PATHS[user.role] : '/';
+        if (!user) return '/';
+        return ROLE_REDIRECT_PATHS[user.role] || '/dashboard';
       },
     }),
     { name: 'ethoshub_auth' }

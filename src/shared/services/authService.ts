@@ -1,5 +1,5 @@
 import type { User, UserRole } from '@/shared/types';
-import api from '@/shared/api/api'; // <--- Importamos tu nueva configuración de Axios
+import api from '@/shared/api/api'; 
 
 export type ProfileUpdatePayload = Partial<User> & {
   firstName?: string;
@@ -53,17 +53,14 @@ export const ROLE_DISPLAY_NAMES: Record<UserRole, string> = {
 
 export const ROLE_REDIRECT_PATHS: Record<UserRole, string> = {
   professional: '/dashboard',
-  recruiter: '/dashboard',
+  recruiter: '/recruiter/dashboard', // Asegurado para que no vaya al de profesional
   admin: '/admin/dashboard',
   guest: '/',
 };
 
-// --- FUNCIONES DEL SERVICIO USANDO AXIOS (api) ---
-
 async function login(email: string, password: string, role?: UserRole): Promise<LoginApiResult> {
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Axios ya maneja el JSON y el base_url
   const response = await api.post<BackendApiResponse<BackendAuthResponse>>('/auth/login', { 
     email: normalizedEmail, 
     password 
@@ -73,11 +70,16 @@ async function login(email: string, password: string, role?: UserRole): Promise<
   if (!authResponse?.token) {
     throw new Error('La respuesta de login no incluyó token');
   }
+  
   let finalRole: UserRole = 'professional';
 
+  // 🔥 AQUI ESTABA EL BUG PRINCIPAL DEL FRONTEND
   if (authResponse.role) {
     const backendRole = authResponse.role.toUpperCase();
-    if (backendRole.includes('RECRUITER') || backendRole.includes('RECLUTADOR')) {
+    
+    if (backendRole.includes('ADMIN')) {
+      finalRole = 'admin';
+    } else if (backendRole.includes('RECRUITER') || backendRole.includes('RECLUTADOR')) {
       finalRole = 'recruiter';
     }
   } else if (role) {
@@ -93,9 +95,9 @@ async function login(email: string, password: string, role?: UserRole): Promise<
     role: finalRole,
     profile_id: authResponse.profileId,
     slug: sanitizeSlug(authResponse.email.split('@')[0]),
-    profession: finalRole === 'recruiter' ? 'Reclutador' : 'Profesional',
+    profession: finalRole === 'admin' ? 'Administrador' : finalRole === 'recruiter' ? 'Reclutador' : 'Profesional',
     bio: '',
-    headline: finalRole === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
+    headline: finalRole === 'admin' ? 'Gestión del sistema' : finalRole === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
     location: '',
     createdAt: new Date().toISOString(),
   };
@@ -118,8 +120,6 @@ async function registerLocal(email: string, password: string, role: UserRole): P
 }
 
 async function getProfile(userId: string): Promise<Partial<User>> {
-  // Nota: Ya NO necesitas sacar el token de localStorage ni ponerlo en headers.
-  // El interceptor de Axios en api.ts lo hace solo.
   const response = await api.get(`/profiles/${userId}`);
   const data = response.data;
 
@@ -135,7 +135,6 @@ async function getProfile(userId: string): Promise<Partial<User>> {
 }
 
 async function updateProfile(userId: string, data: ProfileUpdatePayload): Promise<User> {
-  // Nota: El interceptor inyecta el token automáticamente.
   const response = await api.put(`/profiles/${userId}`, {
     firstName: data.firstName || data.name?.split(' ')[0] || '',
     lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
