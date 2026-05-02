@@ -1,8 +1,6 @@
 import { delay, generateId } from '../lib/utils';
 import {
   mockUsers,
-  mockGlobalSkillTags,
-  mockHardSkills,
   mockSoftSkills,
   mockProjects,
   mockConnections,
@@ -44,6 +42,32 @@ import type {
 } from '../types';
 
 const DELAY_MS = 500;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
+
+interface ApiResponse<T> {
+  success: boolean;
+  status: number;
+  message: string;
+  data: T;
+  errors?: string[];
+}
+
+async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers || {}),
+    },
+  });
+
+  const payload = (await response.json().catch(() => null)) as ApiResponse<T> | null;
+  if (!response.ok || !payload?.success) {
+    throw new Error(payload?.message || 'Request failed');
+  }
+
+  return payload.data;
+}
 
 // =============================================
 // AUTH SERVICE
@@ -84,22 +108,16 @@ export const authService = {
 // =============================================
 // SKILLS SERVICE
 // =============================================
-let hardSkillsData = [...mockHardSkills];
 let softSkillsData = [...mockSoftSkills];
-let globalTagsData = [...mockGlobalSkillTags];
 
 export const skillsService = {
   async searchTags(query: string): Promise<GlobalSkillTag[]> {
-    await delay(300);
-    if (!query) return globalTagsData.filter((t) => t.isNormalized).slice(0, 10);
-    return globalTagsData.filter(
-      (t) => t.isNormalized && t.name.toLowerCase().includes(query.toLowerCase())
-    );
+    const path = query ? `/api/skills/tags?query=${encodeURIComponent(query)}` : '/api/skills/tags';
+    return apiRequest<GlobalSkillTag[]>(path);
   },
 
   async getHardSkills(userId: string): Promise<HardSkill[]> {
-    await delay(DELAY_MS);
-    return hardSkillsData.filter((s) => s.userId === userId);
+    return apiRequest<HardSkill[]>(`/api/users/${userId}/skills/hard`);
   },
 
   async addHardSkill(
@@ -107,114 +125,77 @@ export const skillsService = {
     tagId: string,
     level: SkillLevel
   ): Promise<HardSkill> {
-    await delay(DELAY_MS);
-    const tag = globalTagsData.find((t) => t.id === tagId);
-    if (!tag) throw new Error('Tag not found');
-
-    const newSkill: HardSkill = {
-      id: generateId(),
-      userId,
-      skillTag: tag,
-      level,
-      isTop: false,
-      endorsements: [],
-      createdAt: new Date().toISOString(),
-    };
-    hardSkillsData.push(newSkill);
-    return newSkill;
+    return apiRequest<HardSkill>(`/api/users/${userId}/skills/hard`, {
+      method: 'POST',
+      body: JSON.stringify({ tagId, level }),
+    });
   },
 
   async createTag(name: string, category: string): Promise<GlobalSkillTag> {
-    await delay(DELAY_MS);
-    const newTag: GlobalSkillTag = {
-      id: generateId(),
-      name,
-      category: category as GlobalSkillTag['category'],
-      isNormalized: false,
-    };
-    globalTagsData.push(newTag);
-    return newTag;
+    return apiRequest<GlobalSkillTag>('/api/skills/tags', {
+      method: 'POST',
+      body: JSON.stringify({ name, category }),
+    });
   },
 
   async removeHardSkill(skillId: string): Promise<void> {
-    await delay(DELAY_MS);
-    hardSkillsData = hardSkillsData.filter((s) => s.id !== skillId);
+    await apiRequest<void>(`/api/skills/hard/${skillId}`, {
+      method: 'DELETE',
+    });
   },
 
   async toggleTopSkill(skillId: string): Promise<HardSkill> {
-    await delay(300);
-    const skill = hardSkillsData.find((s) => s.id === skillId);
-    if (!skill) throw new Error('Skill not found');
-
-    const topCount = hardSkillsData.filter((s) => s.userId === skill.userId && s.isTop).length;
-    if (!skill.isTop && topCount >= 3) {
-      throw new Error('Maximum 3 top skills allowed');
-    }
-
-    skill.isTop = !skill.isTop;
-    return skill;
+    return apiRequest<HardSkill>(`/api/skills/hard/${skillId}/top`, {
+      method: 'PATCH',
+    });
   },
 
   async toggleEndorsement(skillId: string, endorserId: string, endorserName: string, endorserAvatar: string): Promise<void> {
-    await delay(DELAY_MS);
-    const skill = hardSkillsData.find((s) => s.id === skillId);
-    if (!skill) throw new Error('Skill not found');
+    await apiRequest<HardSkill>(`/api/skills/hard/${skillId}/endorsements/toggle`, {
+      method: 'PATCH',
+      body: JSON.stringify({ endorserId, endorserName, endorserAvatar }),
+    });
+  },
 
-    const existingIndex = skill.endorsements.findIndex((e) => e.endorserId === endorserId);
-    if (existingIndex >= 0) {
-      skill.endorsements.splice(existingIndex, 1);
-    } else {
-      skill.endorsements.push({
-        id: generateId(),
-        skillId,
-        endorserId,
-        endorserName,
-        endorserAvatar,
-        createdAt: new Date().toISOString(),
-      });
-    }
+  async reorderTopSkills(userId: string, skillIds: string[]): Promise<HardSkill[]> {
+    return apiRequest<HardSkill[]>(`/api/users/${userId}/skills/hard/top-order`, {
+      method: 'PATCH',
+      body: JSON.stringify({ skillIds }),
+    });
   },
 
   async getSoftSkills(userId: string): Promise<SoftSkill[]> {
-    await delay(DELAY_MS);
-    return softSkillsData.filter((s) => s.userId === userId);
+    return apiRequest<SoftSkill[]>(`/api/users/${userId}/skills/soft`);
   },
 
   async addSoftSkill(userId: string, title: string, description?: string): Promise<SoftSkill> {
-    await delay(DELAY_MS);
-    const newSkill: SoftSkill = {
-      id: generateId(),
-      userId,
-      title,
-      description,
-      createdAt: new Date().toISOString(),
-    };
-    softSkillsData.push(newSkill);
-    return newSkill;
+    return apiRequest<SoftSkill>(`/api/users/${userId}/skills/soft`, {
+      method: 'POST',
+      body: JSON.stringify({ title, description }),
+    });
   },
 
   async updateSoftSkill(skillId: string, title: string, description?: string): Promise<SoftSkill> {
-    await delay(DELAY_MS);
-    const skill = softSkillsData.find((s) => s.id === skillId);
-    if (!skill) throw new Error('Skill not found');
-    skill.title = title;
-    skill.description = description;
-    return skill;
+    return apiRequest<SoftSkill>(`/api/skills/soft/${skillId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ title, description }),
+    });
   },
 
   async removeSoftSkill(skillId: string): Promise<void> {
-    await delay(DELAY_MS);
-    softSkillsData = softSkillsData.filter((s) => s.id !== skillId);
+    await apiRequest<void>(`/api/skills/soft/${skillId}`, {
+      method: 'DELETE',
+    });
   },
 
   async getAllTags(): Promise<GlobalSkillTag[]> {
-    await delay(DELAY_MS);
-    return globalTagsData;
+    return apiRequest<GlobalSkillTag[]>('/api/skills/tags/all');
   },
 
   async mergeTags(sourceIds: string[], targetId: string): Promise<void> {
     await delay(DELAY_MS);
-    globalTagsData = globalTagsData.filter((t) => !sourceIds.includes(t.id) || t.id === targetId);
+    void sourceIds;
+    void targetId;
   },
 };
 

@@ -17,6 +17,7 @@ type TalentHardSkill = {
   level: SkillLevel;
   isTop?: boolean;
   endorsements: number;
+  topOrder?: number;
 };
 
 export interface RecruiterTalentProfile {

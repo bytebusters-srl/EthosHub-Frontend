@@ -141,33 +141,9 @@ const mockAuditLogs: AuditLogEntry[] = [
     timestamp: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
     severity: 'success',
   },
-  {
-    id: '7',
-    user_id: 'u7',
-    user_name: 'Sofia Torres',
-    user_avatar: 'https://i.pravatar.cc/150?u=sofia',
-    action: 'ADD',
-    entity_type: 'skill',
-    details: 'Agrego skill "GraphQL"',
-    ip_address: '192.168.1.56',
-    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    severity: 'info',
-  },
-  {
-    id: '8',
-    user_id: 'u8',
-    user_name: 'Diego Navarro',
-    user_avatar: 'https://i.pravatar.cc/150?u=diego',
-    action: 'EXPORT',
-    entity_type: 'portfolio',
-    details: 'Exporto portafolio a PDF',
-    ip_address: '192.168.1.90',
-    timestamp: new Date(Date.now() - 1000 * 60 * 55).toISOString(),
-    severity: 'info',
-  },
 ];
 
-// Mock moderation queue (admin.moderation_queue)
+// Mock moderation queue
 const mockModerationItems: ModerationItem[] = [
   {
     id: 'm1',
@@ -207,19 +183,6 @@ const mockModerationItems: ModerationItem[] = [
     status: 'pending',
     priority: 'medium',
   },
-  {
-    id: 'm4',
-    type: 'image',
-    user_id: 'u12',
-    user_name: 'New User 123',
-    user_avatar: 'https://i.pravatar.cc/150?u=newuser',
-    content_preview: 'Avatar de perfil con contenido cuestionable...',
-    reason: 'Imagen de perfil inapropiada',
-    reported_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    reported_by: 'Sistema automatico',
-    status: 'pending',
-    priority: 'low',
-  },
 ];
 
 // System health mock
@@ -230,7 +193,6 @@ const mockSystemStatus: SystemStatus[] = [
   { name: 'CDN', status: 'healthy', latency: 8, uptime: '100%', lastCheck: '5s ago' },
 ];
 
-// Helper functions
 const formatTimeAgo = (timestamp: string) => {
   const now = new Date();
   const date = new Date(timestamp);
@@ -274,17 +236,14 @@ export default function AdminModerationPage() {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [showAllLogs, setShowAllLogs] = useState(false);
 
-  // Simulate live updates
   useEffect(() => {
     const interval = setInterval(() => {
-      // Update system latencies
       setSystemStatus(prev => prev.map(s => ({
         ...s,
         latency: Math.max(5, s.latency + Math.floor(Math.random() * 10) - 5),
         lastCheck: '5s ago',
       })));
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -323,11 +282,11 @@ export default function AdminModerationPage() {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <Badge className="border-0 bg-red-500/15 text-red-400">Alta Prioridad</Badge>;
+        return <Badge className="border-0 bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400">Alta Prioridad</Badge>;
       case 'medium':
-        return <Badge className="border-0 bg-amber-500/15 text-amber-400">Media</Badge>;
+        return <Badge className="border-0 bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">Media</Badge>;
       case 'low':
-        return <Badge className="border-0 bg-slate-500/15 text-slate-400">Baja</Badge>;
+        return <Badge className="border-0 bg-slate-100 text-slate-600 dark:bg-slate-500/15 dark:text-slate-400">Baja</Badge>;
       default:
         return null;
     }
@@ -335,35 +294,35 @@ export default function AdminModerationPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="h-4 w-4 text-emerald-400" />;
-      case 'degraded': return <AlertTriangle className="h-4 w-4 text-amber-400" />;
-      case 'down': return <XCircle className="h-4 w-4 text-red-400" />;
+      case 'healthy': return <CheckCircle className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />;
+      case 'degraded': return <AlertTriangle className="h-4 w-4 text-amber-500 dark:text-amber-400" />;
+      case 'down': return <XCircle className="h-4 w-4 text-red-500 dark:text-red-400" />;
       default: return null;
     }
   };
 
   return (
-    <div className="min-h-screen space-y-6 bg-black p-6">
-      {/* Header */}
+    <div className="min-h-screen space-y-4 sm:space-y-6 bg-gray-50 p-4 sm:p-6 dark:bg-black">
+      {/* Header - Adaptado para móvil */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-sans text-3xl font-bold tracking-tight text-white">
-            Moderacion y Auditoria
+          <h1 className="font-sans text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Moderación y Auditoría
           </h1>
-          <p className="mt-1 text-violet-300/70">Panel de control del esquema admin</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-violet-300/70">Panel de control del esquema admin</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefresh}
-            className="border-violet-500/30 bg-transparent text-violet-300 hover:border-violet-500/50 hover:bg-violet-500/10"
+            className="border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-violet-500/30 dark:bg-transparent dark:text-violet-300 dark:hover:border-violet-500/50 dark:hover:bg-violet-500/10"
           >
             <RefreshCw className={cn("mr-2 h-4 w-4", isRefreshing && "animate-spin")} />
             Actualizar
           </Button>
           {pendingItems.length > 0 && (
-            <Badge className="border-0 bg-amber-500/15 text-amber-400">
+            <Badge className="border-0 bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">
               <Flag className="mr-1 h-3 w-3" />
               {pendingItems.length} pendientes
             </Badge>
@@ -371,72 +330,67 @@ export default function AdminModerationPage() {
         </div>
       </div>
 
-      {/* System Health Grid */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      {/* System Health Grid - Arreglado el responsive para móvil (1 col), tablet (2 col), desktop (4 col) */}
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
         {systemStatus.map((service, index) => (
           <motion.div
             key={service.name}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 }}
-            className="group relative overflow-hidden rounded-xl border border-violet-500/20 bg-black p-4 transition-all hover:border-violet-500/40"
+            className="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-violet-300 dark:border-violet-500/20 dark:bg-zinc-950 dark:hover:border-violet-500/40"
           >
-            {/* Animated pulse for healthy status */}
             {service.status === 'healthy' && (
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
             )}
             
             <div className="flex items-center justify-between">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
-                {service.name === 'API Server' && <Server className="h-5 w-5 text-violet-400" />}
-                {service.name === 'Database' && <Database className="h-5 w-5 text-violet-400" />}
-                {service.name === 'Auth Service' && <Shield className="h-5 w-5 text-violet-400" />}
-                {service.name === 'CDN' && <Zap className="h-5 w-5 text-violet-400" />}
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-500/10">
+                {service.name === 'API Server' && <Server className="h-5 w-5 text-violet-600 dark:text-violet-400" />}
+                {service.name === 'Database' && <Database className="h-5 w-5 text-violet-600 dark:text-violet-400" />}
+                {service.name === 'Auth Service' && <Shield className="h-5 w-5 text-violet-600 dark:text-violet-400" />}
+                {service.name === 'CDN' && <Zap className="h-5 w-5 text-violet-600 dark:text-violet-400" />}
               </div>
               <div className="relative">
                 {getStatusIcon(service.status)}
                 {service.status === 'healthy' && (
                   <span className="absolute inset-0 animate-ping">
-                    <CheckCircle className="h-4 w-4 text-emerald-400/50" />
+                    <CheckCircle className="h-4 w-4 text-emerald-500/50 dark:text-emerald-400/50" />
                   </span>
                 )}
               </div>
             </div>
             <div className="mt-3">
-              <p className="font-medium text-white">{service.name}</p>
+              <p className="font-medium text-gray-900 dark:text-white">{service.name}</p>
               <div className="mt-1 flex items-center gap-2 text-xs">
-                <span className="text-emerald-400">{service.latency}ms</span>
-                <span className="text-violet-500">|</span>
-                <span className="text-violet-300/60">{service.uptime}</span>
+                <span className="text-emerald-600 dark:text-emerald-400">{service.latency}ms</span>
+                <span className="text-gray-300 dark:text-violet-500">|</span>
+                <span className="text-gray-500 dark:text-violet-300/60">{service.uptime}</span>
               </div>
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Main Content Grid - Pasa a 1 columna en móvil y 2 en pantallas grandes */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* Audit Trail Timeline */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <div className="rounded-xl border border-violet-500/20 bg-black p-6">
-            <div className="mb-6 flex items-center justify-between">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 dark:border-violet-500/20 dark:bg-zinc-950">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="font-sans text-lg font-semibold text-white">Audit Trail</h2>
-                <p className="text-sm text-violet-300/60">admin.audit_logs</p>
+                <h2 className="font-sans text-lg font-semibold text-gray-900 dark:text-white">Audit Trail</h2>
+                <p className="text-sm text-gray-500 dark:text-violet-300/60">admin.audit_logs</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center sm:w-auto">
                 <select
                   value={selectedLogFilter}
                   onChange={(e) => setSelectedLogFilter(e.target.value)}
-                  className="rounded-lg border border-violet-500/20 bg-black px-3 py-1.5 text-sm text-violet-300 focus:border-violet-500/50 focus:outline-none"
+                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-violet-500 focus:outline-none sm:w-auto dark:border-violet-500/20 dark:bg-black dark:text-violet-300 dark:focus:border-violet-500/50"
                 >
                   <option value="all">Todos</option>
                   <option value="info">Info</option>
-                  <option value="success">Exito</option>
+                  <option value="success">Éxito</option>
                   <option value="warning">Advertencia</option>
                   <option value="error">Error</option>
                 </select>
@@ -445,8 +399,7 @@ export default function AdminModerationPage() {
 
             {/* Timeline */}
             <div className="relative space-y-4">
-              {/* Timeline line */}
-              <div className="absolute left-[11px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-violet-500/50 via-violet-500/20 to-transparent" />
+              <div className="absolute left-[11px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-gray-200 via-gray-100 to-transparent dark:from-violet-500/50 dark:via-violet-500/20" />
 
               <AnimatePresence mode="popLayout">
                 {displayedLogs.map((log, index) => {
@@ -460,43 +413,41 @@ export default function AdminModerationPage() {
                       transition={{ delay: index * 0.05 }}
                       className="relative flex gap-4 pl-8"
                     >
-                      {/* Timeline bullet */}
                       <div className={cn(
-                        "absolute left-0 top-1.5 h-6 w-6 rounded-full border-2 border-black flex items-center justify-center",
+                        "absolute left-0 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white dark:border-black",
                         getSeverityColor(log.severity)
                       )}>
                         <EntityIcon className="h-3 w-3 text-white" />
                       </div>
 
-                      {/* Content */}
-                      <div className="flex-1 rounded-lg border border-violet-500/10 bg-violet-500/5 p-3 transition-all hover:border-violet-500/20">
-                        <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-all hover:border-gray-300 dark:border-violet-500/10 dark:bg-violet-500/5 dark:hover:border-violet-500/20">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex items-center gap-2">
                             <Avatar 
                               src={log.user_avatar} 
                               name={log.user_name} 
                               size="sm" 
-                              className="border border-violet-500/20"
+                              className="border border-gray-200 dark:border-violet-500/20"
                             />
                             <div>
-                              <p className="text-sm font-medium text-white">{log.user_name}</p>
-                              <p className="text-xs text-violet-300/60">{formatTimeAgo(log.timestamp)}</p>
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">{log.user_name}</p>
+                              <p className="text-xs text-gray-500 dark:text-violet-300/60">{formatTimeAgo(log.timestamp)}</p>
                             </div>
                           </div>
                           <Badge 
                             className={cn(
-                              "border-0 text-xs",
-                              log.severity === 'info' && "bg-violet-500/15 text-violet-400",
-                              log.severity === 'success' && "bg-emerald-500/15 text-emerald-400",
-                              log.severity === 'warning' && "bg-amber-500/15 text-amber-400",
-                              log.severity === 'error' && "bg-red-500/15 text-red-400"
+                              "w-fit border-0 text-xs",
+                              log.severity === 'info' && "bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
+                              log.severity === 'success' && "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
+                              log.severity === 'warning' && "bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
+                              log.severity === 'error' && "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400"
                             )}
                           >
                             {log.action}
                           </Badge>
                         </div>
-                        <p className="mt-2 text-sm text-violet-300/80">{log.details}</p>
-                        <p className="mt-1 text-xs text-violet-400/50">IP: {log.ip_address}</p>
+                        <p className="mt-2 text-sm text-gray-700 dark:text-violet-300/80">{log.details}</p>
+                        <p className="mt-1 text-xs text-gray-400 dark:text-violet-400/50">IP: {log.ip_address}</p>
                       </div>
                     </motion.div>
                   );
@@ -506,7 +457,7 @@ export default function AdminModerationPage() {
               {filteredLogs.length > 6 && (
                 <button
                   onClick={() => setShowAllLogs(!showAllLogs)}
-                  className="ml-8 flex items-center gap-2 text-sm text-violet-400 transition-colors hover:text-violet-300"
+                  className="ml-8 flex items-center gap-2 text-sm text-violet-600 transition-colors hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
                 >
                   <ChevronDown className={cn("h-4 w-4 transition-transform", showAllLogs && "rotate-180")} />
                   {showAllLogs ? 'Ver menos' : `Ver ${filteredLogs.length - 6} mas`}
@@ -517,31 +468,26 @@ export default function AdminModerationPage() {
         </motion.div>
 
         {/* Moderation Queue */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="rounded-xl border border-violet-500/20 bg-black p-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 dark:border-violet-500/20 dark:bg-zinc-950">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <h2 className="font-sans text-lg font-semibold text-white">Cola de Moderacion</h2>
-                <p className="text-sm text-violet-300/60">admin.moderation_queue</p>
+                <h2 className="font-sans text-lg font-semibold text-gray-900 dark:text-white">Cola de Moderación</h2>
+                <p className="text-sm text-gray-500 dark:text-violet-300/60">admin.moderation_queue</p>
               </div>
-              <Badge className="border-0 bg-violet-500/15 text-violet-400">
+              <Badge className="border-0 bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400">
                 {pendingItems.length} pendientes
               </Badge>
             </div>
 
-            {/* Moderation Cards */}
             <div className="space-y-4">
               {pendingItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
-                    <CheckCircle className="h-8 w-8 text-emerald-400" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/10">
+                    <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <p className="mt-4 font-medium text-white">Todo en orden</p>
-                  <p className="mt-1 text-sm text-violet-300/60">No hay contenido pendiente de revision</p>
+                  <p className="mt-4 font-medium text-gray-900 dark:text-white">Todo en orden</p>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-violet-300/60">No hay contenido pendiente de revisión</p>
                 </div>
               ) : (
                 <AnimatePresence mode="popLayout">
@@ -557,63 +503,61 @@ export default function AdminModerationPage() {
                         className={cn(
                           "rounded-xl border p-4 transition-all",
                           item.priority === 'high' 
-                            ? "border-red-500/30 bg-red-500/5"
+                            ? "border-red-200 bg-red-50 dark:border-red-500/30 dark:bg-red-500/5"
                             : item.priority === 'medium'
-                            ? "border-amber-500/30 bg-amber-500/5"
-                            : "border-violet-500/20 bg-violet-500/5"
+                            ? "border-amber-200 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/5"
+                            : "border-gray-200 bg-gray-50 dark:border-violet-500/20 dark:bg-violet-500/5"
                         )}
                       >
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex items-start gap-3">
                             <div className={cn(
                               "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
-                              item.priority === 'high' 
-                                ? "bg-red-500/20 text-red-400"
-                                : item.priority === 'medium'
-                                ? "bg-amber-500/20 text-amber-400"
-                                : "bg-violet-500/20 text-violet-400"
+                              item.priority === 'high' ? "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400"
+                              : item.priority === 'medium' ? "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400"
+                              : "bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400"
                             )}>
                               <TypeIcon className="h-5 w-5" />
                             </div>
                             <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium text-white">{item.user_name}</p>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="font-medium text-gray-900 dark:text-white">{item.user_name}</p>
                                 {getPriorityBadge(item.priority)}
                               </div>
-                              <p className="mt-1 line-clamp-2 text-sm text-violet-300/70">
+                              <p className="mt-1 line-clamp-2 text-sm text-gray-600 dark:text-violet-300/70">
                                 {item.content_preview}
                               </p>
-                              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-violet-400/60">
+                              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-violet-400/60">
                                 <span className="flex items-center gap-1">
                                   <Flag className="h-3 w-3" />
                                   {item.reason}
                                 </span>
-                                <span>|</span>
-                                <span>Reportado por {item.reported_by}</span>
-                                <span>|</span>
+                                <span className="hidden sm:inline">|</span>
+                                <span>Por {item.reported_by}</span>
+                                <span className="hidden sm:inline">|</span>
                                 <span>{formatTimeAgo(item.reported_at)}</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Quick Actions */}
-                        <div className="mt-4 flex items-center justify-between border-t border-violet-500/10 pt-4">
+                        {/* Quick Actions - Responsivo en móvil */}
+                        <div className="mt-4 flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-violet-500/10">
                           <button
                             onClick={() => {
                               setSelectedItem(item);
                               setDetailModalOpen(true);
                             }}
-                            className="flex items-center gap-2 text-sm text-violet-400 transition-colors hover:text-violet-300"
+                            className="flex items-center gap-2 text-sm text-violet-600 transition-colors hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
                           >
                             <Eye className="h-4 w-4" />
                             Ver detalles
                           </button>
-                          <div className="flex items-center gap-2">
+                          <div className="flex w-full items-center gap-2 sm:w-auto">
                             <Button
                               size="sm"
                               onClick={() => handleModerationAction(item.id, 'reject')}
-                              className="border-red-500/30 bg-transparent text-red-400 hover:bg-red-500/10"
+                              className="flex-1 border-red-200 bg-white text-red-600 hover:bg-red-50 sm:flex-none dark:border-red-500/30 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-500/10"
                               variant="outline"
                             >
                               <X className="mr-1 h-4 w-4" />
@@ -622,7 +566,7 @@ export default function AdminModerationPage() {
                             <Button
                               size="sm"
                               onClick={() => handleModerationAction(item.id, 'approve')}
-                              className="bg-emerald-600 text-white hover:bg-emerald-700"
+                              className="flex-1 bg-emerald-600 text-white hover:bg-emerald-700 sm:flex-none"
                             >
                               <Check className="mr-1 h-4 w-4" />
                               Aprobar
@@ -639,43 +583,43 @@ export default function AdminModerationPage() {
         </motion.div>
       </div>
 
-      {/* Statistics Row */}
+      {/* Statistics Row - Arreglado el grid responsivo */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="grid grid-cols-2 gap-4 sm:grid-cols-4"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:gap-4"
       >
         {[
           { label: 'Acciones Hoy', value: '1,247', icon: Activity, color: 'violet' },
           { label: 'Reportes Resueltos', value: '89', icon: CheckCircle, color: 'emerald' },
           { label: 'Advertencias Activas', value: '12', icon: AlertTriangle, color: 'amber' },
           { label: 'Usuarios Baneados', value: '3', icon: XCircle, color: 'red' },
-        ].map((stat, index) => (
+        ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl border border-violet-500/20 bg-black p-4"
+            className="rounded-xl border border-gray-200 bg-white p-4 dark:border-violet-500/20 dark:bg-black"
           >
             <div className="flex items-center gap-3">
               <div className={cn(
                 "flex h-10 w-10 items-center justify-center rounded-lg",
-                stat.color === 'violet' && "bg-violet-500/20 text-violet-400",
-                stat.color === 'emerald' && "bg-emerald-500/20 text-emerald-400",
-                stat.color === 'amber' && "bg-amber-500/20 text-amber-400",
-                stat.color === 'red' && "bg-red-500/20 text-red-400"
+                stat.color === 'violet' && "bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400",
+                stat.color === 'emerald' && "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400",
+                stat.color === 'amber' && "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
+                stat.color === 'red' && "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400"
               )}>
                 <stat.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs text-violet-300/60">{stat.label}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                <p className="text-xs text-gray-500 dark:text-violet-300/60">{stat.label}</p>
               </div>
             </div>
           </div>
         ))}
       </motion.div>
 
-      {/* Detail Modal - Nothing Phone Style */}
+      {/* Detail Modal */}
       <AnimatePresence>
         {detailModalOpen && selectedItem && (
           <>
@@ -683,7 +627,7 @@ export default function AdminModerationPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/80"
               onClick={() => setDetailModalOpen(false)}
             />
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -691,68 +635,68 @@ export default function AdminModerationPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-lg rounded-2xl border border-violet-500/30 bg-black/95 p-6 shadow-2xl backdrop-blur-xl"
+                className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-violet-500/30 dark:bg-black/95 dark:backdrop-blur-xl"
               >
                 {/* Header */}
                 <div className="mb-6 flex items-start justify-between">
                   <div>
-                    <h3 className="font-sans text-xl font-semibold text-white">
-                      Revision de Contenido
+                    <h3 className="font-sans text-xl font-semibold text-gray-900 dark:text-white">
+                      Revisión de Contenido
                     </h3>
-                    <p className="mt-1 text-sm text-violet-300/60">
+                    <p className="mt-1 text-sm text-gray-500 dark:text-violet-300/60">
                       ID: {selectedItem.id}
                     </p>
                   </div>
                   <button
                     onClick={() => setDetailModalOpen(false)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-500/20 text-violet-400 transition-colors hover:bg-violet-500/10"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-100 dark:border-violet-500/20 dark:text-violet-400 dark:hover:bg-violet-500/10"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 {/* User Info */}
-                <div className="mb-6 flex items-center gap-4 rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
+                <div className="mb-6 flex items-center gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-violet-500/20 dark:bg-violet-500/5">
                   <Avatar 
                     src={selectedItem.user_avatar} 
                     name={selectedItem.user_name} 
                     size="lg" 
-                    className="border-2 border-violet-500/30"
+                    className="border-2 border-gray-200 dark:border-violet-500/30"
                   />
                   <div>
-                    <p className="font-medium text-white">{selectedItem.user_name}</p>
-                    <p className="text-sm text-violet-300/60">Usuario reportado</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{selectedItem.user_name}</p>
+                    <p className="text-sm text-gray-500 dark:text-violet-300/60">Usuario reportado</p>
                     {getPriorityBadge(selectedItem.priority)}
                   </div>
                 </div>
 
                 {/* Content Preview */}
                 <div className="mb-6">
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-violet-300/60">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-violet-300/60">
                     Contenido Reportado
                   </p>
-                  <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
-                    <p className="text-sm text-violet-300/80">{selectedItem.content_preview}</p>
+                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-violet-500/20 dark:bg-violet-500/5">
+                    <p className="text-sm text-gray-700 dark:text-violet-300/80">{selectedItem.content_preview}</p>
                   </div>
                 </div>
 
                 {/* Details */}
                 <div className="mb-6 space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-violet-300/60">Razon del reporte</span>
-                    <span className="text-white">{selectedItem.reason}</span>
+                    <span className="text-gray-500 dark:text-violet-300/60">Razón del reporte</span>
+                    <span className="text-gray-900 dark:text-white">{selectedItem.reason}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-violet-300/60">Reportado por</span>
-                    <span className="text-white">{selectedItem.reported_by}</span>
+                    <span className="text-gray-500 dark:text-violet-300/60">Reportado por</span>
+                    <span className="text-gray-900 dark:text-white">{selectedItem.reported_by}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-violet-300/60">Fecha del reporte</span>
-                    <span className="text-white">{formatTimeAgo(selectedItem.reported_at)}</span>
+                    <span className="text-gray-500 dark:text-violet-300/60">Fecha del reporte</span>
+                    <span className="text-gray-900 dark:text-white">{formatTimeAgo(selectedItem.reported_at)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-violet-300/60">Tipo de contenido</span>
-                    <span className="text-white capitalize">{selectedItem.type.replace('_', ' ')}</span>
+                    <span className="text-gray-500 dark:text-violet-300/60">Tipo de contenido</span>
+                    <span className="text-gray-900 dark:text-white capitalize">{selectedItem.type.replace('_', ' ')}</span>
                   </div>
                 </div>
 
@@ -763,11 +707,11 @@ export default function AdminModerationPage() {
                       handleModerationAction(selectedItem.id, 'reject');
                       setDetailModalOpen(false);
                     }}
-                    className="flex-1 border-red-500/30 bg-transparent text-red-400 hover:bg-red-500/10"
+                    className="flex-1 border-red-200 bg-white text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-500/10"
                     variant="outline"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Eliminar Contenido
+                    Eliminar
                   </Button>
                   <Button
                     onClick={() => {

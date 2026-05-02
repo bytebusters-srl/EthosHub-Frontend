@@ -7,19 +7,25 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  avatar: string;
   username?: string;
+  avatar?: string;
+  bio?: string;
   role: UserRole;
-  slug: string;
-  profession: string;
-  bio: string;
+  slug?: string;
+  profession?: string;
   headline?: string;
-  location: string;
-  website: string;
+  location?: string;
+  country?: string;
+  phone?: string;
+  website?: string;
+  // Campos añadidos para la sincronización con la DB
+  status?: string;    // Mapeado a core.availabilities.status [cite: 179]
+  seniority?: string; // Mapeado a core.profiles_basic.seniority [cite: 377]
+  profile_id?: string; // ID del perfil en la tabla core.profiles
+  createdAt?: string;
   company?: string;
-  createdAt: string;
+  availabilityStatus?: string;
 }
-
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -31,11 +37,11 @@ export interface AuthState {
 // =============================================
 export type SkillLevel = 'Junior' | 'Mid' | 'Senior';
 
-export type SkillCategory = 
-  | 'Frontend' 
-  | 'Backend' 
-  | 'Bases de Datos' 
-  | 'Infraestructura' 
+export type SkillCategory =
+  | 'Frontend'
+  | 'Backend'
+  | 'Bases de Datos'
+  | 'Infraestructura'
   | 'Otras Tecnologías';
 
 export interface GlobalSkillTag {
@@ -51,6 +57,7 @@ export interface HardSkill {
   skillTag: GlobalSkillTag;
   level: SkillLevel;
   isTop: boolean;
+  topOrder?: number;
   endorsements: Endorsement[];
   createdAt: string;
 }
@@ -333,6 +340,24 @@ export interface AcademicRecord {
   credentialUrl?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// =============================================
+// RECRUITER PROFILE (Perfil de Empresa)
+// =============================================
+export interface CompanyProfile {
+  profile_id?: string;
+  company_name: string;
+  industry: string;
+  company_size: number | string;
+  nit: string;
+  contact_first_name: string;
+  contact_last_name: string;
+  website_url: string;
+  phone?: string;
+  location?: string;
+  description?: string;
+  logo_url?: string;
 }
 
 // =============================================

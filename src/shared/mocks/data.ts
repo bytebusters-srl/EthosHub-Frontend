@@ -141,12 +141,12 @@ export const mockGlobalSkillTags: GlobalSkillTag[] = [
 ];
 
 export const mockEndorsements: Endorsement[] = [
-  { id: 'e1', skillId: 'hs1', endorserId: '2', endorserName: 'Ana García', endorserAvatar: mockUsers[1].avatar, createdAt: '2024-01-10T10:00:00Z' },
-  { id: 'e2', skillId: 'hs1', endorserId: '4', endorserName: 'María López', endorserAvatar: mockUsers[3].avatar, createdAt: '2024-01-12T14:30:00Z' },
-  { id: 'e3', skillId: 'hs1', endorserId: '5', endorserName: 'Pedro Ramírez', endorserAvatar: mockUsers[4].avatar, createdAt: '2024-01-15T09:00:00Z' },
-  { id: 'e4', skillId: 'hs2', endorserId: '2', endorserName: 'Ana García', endorserAvatar: mockUsers[1].avatar, createdAt: '2024-01-11T11:00:00Z' },
-  { id: 'e5', skillId: 'hs2', endorserId: '5', endorserName: 'Pedro Ramírez', endorserAvatar: mockUsers[4].avatar, createdAt: '2024-01-13T16:00:00Z' },
-  { id: 'e6', skillId: 'hs3', endorserId: '4', endorserName: 'María López', endorserAvatar: mockUsers[3].avatar, createdAt: '2024-01-14T12:00:00Z' },
+  { id: 'e1', skillId: 'hs1', endorserId: '2', endorserName: 'Ana García', endorserAvatar: mockUsers[1].avatar || '', createdAt: '2024-01-10T10:00:00Z' },
+  { id: 'e2', skillId: 'hs1', endorserId: '4', endorserName: 'María López', endorserAvatar: mockUsers[3].avatar || '', createdAt: '2024-01-12T14:30:00Z' },
+  { id: 'e3', skillId: 'hs1', endorserId: '5', endorserName: 'Pedro Ramírez', endorserAvatar: mockUsers[4].avatar || '', createdAt: '2024-01-15T09:00:00Z' },
+  { id: 'e4', skillId: 'hs2', endorserId: '2', endorserName: 'Ana García', endorserAvatar: mockUsers[1].avatar || '', createdAt: '2024-01-11T11:00:00Z' },
+  { id: 'e5', skillId: 'hs2', endorserId: '5', endorserName: 'Pedro Ramírez', endorserAvatar: mockUsers[4].avatar || '', createdAt: '2024-01-13T16:00:00Z' },
+  { id: 'e6', skillId: 'hs3', endorserId: '4', endorserName: 'María López', endorserAvatar: mockUsers[3].avatar || '', createdAt: '2024-01-14T12:00:00Z' },
 ];
 
 export const mockHardSkills: HardSkill[] = [

@@ -151,19 +151,21 @@ function buildPublicProfile(slug: string): PublicProfile | null {
     ],
   };
 
+  const userSlug = user.slug || '';
+
   return {
     id: user.id,
-    slug: user.slug,
-    name: user.name,
-    profession: user.profession,
-    bio: user.bio,
-    location: user.location,
-    website: user.website,
-    email: user.email,
-    avatar: user.avatar,
-    headline: headlineBySlug[user.slug] ?? user.profession,
-    company: companyBySlug[user.slug] ?? 'Professional Profile',
-    about: aboutBySlug[user.slug] ?? user.bio,
+    slug: user?.slug || '',
+    name: user.name || '',
+    profession: user.profession || '',
+    bio: user?.bio || '',
+    location: user.location || '',
+    website: user.website || '',
+    email: user.email || '',
+    avatar: user.avatar || '',
+    headline: headlineBySlug[userSlug] ?? user.profession ?? '',
+    company: companyBySlug[userSlug] ?? user.company ?? 'Professional Profile',
+    about: aboutBySlug[userSlug] ?? user.bio ?? '',
     skills: hardSkills.slice(0, 6).map((skill) => ({
       id: skill.id,
       name: skill.skillTag.name,
@@ -198,7 +200,7 @@ function buildPublicProfile(slug: string): PublicProfile | null {
       period: `${item.startDate} - ${item.endDate}`,
       description: 'Formacion orientada a fundamentos, criterio tecnico y crecimiento profesional.',
     })),
-    highlights: highlightsBySlug[user.slug] ?? ['Perfil profesional en construccion.'],
+    highlights: (user.slug && highlightsBySlug[user.slug]) ? highlightsBySlug[user.slug] : ['Perfil profesional en construcción.'],
     recommendations: recommendations.map((item) => ({
       id: item.id,
       author: item.authorName,
