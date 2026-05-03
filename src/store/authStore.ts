@@ -87,17 +87,30 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       fetchProfile: async () => {
-        const { user } = get();
-        if (!user) return;
-        try {
-          const dbData = await authService.getProfile(user.id);
-          set((state) => ({
-            user: state.user ? { ...state.user, ...dbData } : null,
-          }));
-        } catch (error) {
-          console.error('Error al sincronizar perfil con la BD', error);
-        }
-      },
+  const { user } = get();
+
+  if (!user) return;
+
+  if (!user.profile_id) {
+    console.error('El usuario no tiene profile_id');
+    return;
+  }
+
+  try {
+    const dbData = await authService.getProfile(user.profile_id);
+
+    set((state) => ({
+      user: state.user
+        ? {
+            ...state.user,
+            ...dbData,
+          }
+        : null,
+    }));
+  } catch (error) {
+    console.error('Error al sincronizar perfil con la BD', error);
+  }
+},
 
       updateProfile: async (data: ProfileUpdatePayload) => {
         const { user } = get();

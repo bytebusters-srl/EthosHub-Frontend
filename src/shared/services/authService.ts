@@ -119,42 +119,65 @@ async function registerLocal(email: string, password: string, role: UserRole): P
   });
 }
 
-async function getProfile(userId: string): Promise<Partial<User>> {
-  // Nota: Ya NO necesitas sacar el token de localStorage ni ponerlo en headers.
-  // El interceptor de Axios en api.ts lo hace solo.
-  const response = await api.get(`/v1/recruiter/profile/${userId}`);
-  const data = response.data;
+async function getProfile(profileId: string): Promise<Partial<User>> {
+  const response = await api.get(`/v1/recruiter/profile/${profileId}`);
+  const profile = response.data.data;
+
+  // Mapa inverso de countryId → nombre del país
+  const COUNTRY_NAME_MAP: Record<number, string> = {
+    1: 'Argentina', 2: 'Bolivia', 3: 'Brasil', 4: 'Chile',
+    5: 'Colombia', 6: 'Costa Rica', 7: 'Cuba', 8: 'Ecuador',
+    9: 'El Salvador', 10: 'España', 11: 'Guatemala', 12: 'Honduras',
+    13: 'México', 14: 'Nicaragua', 15: 'Panamá', 16: 'Paraguay',
+    17: 'Perú', 18: 'República Dominicana', 19: 'Uruguay', 20: 'Venezuela',
+  };
 
   return {
-    name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
-    bio: data.bio,
-    avatar: data.photoUrl,
-    location: data.country,
-    phone: data.phone,
-    status: data.availabilityStatus,
-    seniority: data.seniority
+    name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim(),
+    avatar: profile.photoUrl || '',
+    location: profile.countryId ? COUNTRY_NAME_MAP[profile.countryId] || '' : '', // ✅ countryId → nombre
+    phone: profile.phoneNumber || '',   // ✅ phoneNumber, no phone
+    bio: profile.bio || '',
+    status: profile.availabilityStatus || 'Disponible',
+    seniority: profile.seniority || 'Junior',
   };
 }
 
-async function updateProfile(userId: string, data: ProfileUpdatePayload): Promise<User> {
-  // Nota: El interceptor inyecta el token automáticamente.
-  const response = await api.put(`/v1/recruiter/profile/${userId}`, {
-    firstName: data.firstName || data.name?.split(' ')[0] || '',
-    lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
-    bio: data.bio || '',
-    photoUrl: data.photoUrl || data.avatar || '',
-    country: data.country || data.location || '',
-    phone: data.phone || '',
-    availabilityStatus: data.availabilityStatus || data.status || 'Disponible',
-    seniority: data.seniority || 'Junior'
-  });
+async function updateProfile(
+  profileId: string,
+  data: ProfileUpdatePayload
+): Promise<User> {
+  const response = await api.put(
+    `/v1/recruiter/profile/${profileId}`,
+    {
+      firstName: data.firstName || data.name?.split(' ')[0] || '',
+      lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
+      bio: data.bio || '',
+      photoUrl: data.photoUrl || data.avatar || '',
+      country: data.country || data.location || '',
+      phone: data.phone || '',
+      availabilityStatus:
+        data.availabilityStatus || data.status || 'Disponible',
+      seniority: data.seniority || 'Junior',
+    }
+  );
+
+  const profile = response.data.data;
 
   return {
-    id: userId,
+    id: profile.userId ?? profileId,
+    profile_id: profile.profileId ?? profileId,
+    name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim(),
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    email: data.email || '',
+    avatar: profile.photoUrl || '',
+    location: profile.country || '',
+    phone: profile.phone || '',
+    bio: profile.bio || '',
+    status: profile.availabilityStatus || 'Disponible',
+    seniority: profile.seniority || 'Junior',
     ...data,
-    avatar: data.photoUrl || data.avatar,
-    location: data.country || data.location,
-    phone: data.phone,
   } as User;
 }
 
