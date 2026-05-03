@@ -55,7 +55,7 @@ export default function LoginPage() {
       });
 
       if (result.user.role === 'professional' && shouldStartSkillOnboarding(result.user.email)) {
-        navigate('/dashboard/skills?onboarding=1');
+        navigate('/dashboard');
         return;
       }
       navigate(result.redirectPath);

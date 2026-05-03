@@ -37,12 +37,14 @@ export interface AuthState {
 // =============================================
 export type SkillLevel = 'Junior' | 'Mid' | 'Senior';
 
-export type SkillCategory =
+export type SkillCategory = 
   | 'Frontend'
   | 'Backend'
-  | 'Bases de Datos'
-  | 'Infraestructura'
-  | 'Otras Tecnologías';
+  | 'Data'
+  | 'Infrastructure'
+  | 'Mobile'
+  | 'Design'
+  | 'Soft Skill';
 
 export interface GlobalSkillTag {
   id: string;

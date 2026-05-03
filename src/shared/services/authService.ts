@@ -120,8 +120,9 @@ async function registerLocal(email: string, password: string, role: UserRole): P
 }
 
 async function getProfile(userId: string): Promise<Partial<User>> {
-  //(cambios cami )const response = await api.get(`/v1/recruiter/profile/${userId}`);
-  const response = await api.get(`/profiles/${userId}`);
+  // Nota: Ya NO necesitas sacar el token de localStorage ni ponerlo en headers.
+  // El interceptor de Axios en api.ts lo hace solo.
+  const response = await api.get(`/v1/recruiter/profile/${userId}`);
   const data = response.data;
 
   return {
@@ -136,8 +137,8 @@ async function getProfile(userId: string): Promise<Partial<User>> {
 }
 
 async function updateProfile(userId: string, data: ProfileUpdatePayload): Promise<User> {
-  //(cambios cami) const response = await api.put(`/v1/recruiter/profile/${userId}`, {
-  const response = await api.put(`/profiles/${userId}`, {
+  // Nota: El interceptor inyecta el token automáticamente.
+  const response = await api.put(`/v1/recruiter/profile/${userId}`, {
     firstName: data.firstName || data.name?.split(' ')[0] || '',
     lastName: data.lastName || data.name?.split(' ').slice(1).join(' ') || '',
     bio: data.bio || '',
