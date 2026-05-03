@@ -37,7 +37,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   fetchHardSkills: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/users/${userId}/skills/hard`);
+      const response = await api.get(`/v1/users/${userId}/skills/hard`);
       set({ hardSkills: response.data.data || [], loading: false });
     } catch (err) {
       set({ error: 'Error al cargar habilidades', loading: false });
@@ -47,7 +47,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   fetchSoftSkills: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const response = await api.get(`/users/${userId}/skills/soft`);
+      const response = await api.get(`/v1/users/${userId}/skills/soft`);
       set({ softSkills: response.data.data || [], loading: false });
     } catch (err) {
       set({ error: 'Error al cargar soft skills', loading: false });
@@ -57,7 +57,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   searchTags: async (query: string) => {
     if (!query) return set({ searchResults: [] });
     try {
-      const response = await api.get(`/skills/tags?query=${query}`);
+      const response = await api.get(`/v1/skills/tags?query=${query}`);
       set({ searchResults: response.data.data || [] });
     } catch {
       set({ searchResults: [] });
@@ -68,7 +68,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
     set({ loading: true });
     try {
       console.log('🔵 addHardSkill START:', { userId, tagId, level });
-      await api.post(`/users/${userId}/skills/hard`, { tagId, level });
+      await api.post(`/v1/users/${userId}/skills/hard`, { tagId, level });
       await get().fetchHardSkills(userId);
       console.log('🟢 addHardSkill SUCCESS');
       set({ loading: false });
@@ -97,7 +97,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
 
   removeHardSkill: async (userId: string, skillId: string) => {
     try {
-      await api.delete(`/users/${userId}/skills/hard/${skillId}`);
+      await api.delete(`/v1/users/${userId}/skills/hard/${skillId}`);
       set((state) => ({
         hardSkills: state.hardSkills.filter((s) => s.id !== skillId),
       }));
@@ -109,7 +109,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   addSoftSkill: async (userId: string, title: string, description?: string) => {
     try {
       console.log('🔵 addSoftSkill START:', { userId, title, description });
-      await api.post(`/users/${userId}/skills/soft`, { title, description });
+      await api.post(`/v1/users/${userId}/skills/soft`, { title, description });
       await get().fetchSoftSkills(userId);
       console.log('🟢 addSoftSkill SUCCESS');
     } catch (error) {
@@ -121,7 +121,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
 
   updateSoftSkill: async (skillId: string, title: string, description?: string) => {
     try {
-      await api.put(`/users/skills/soft/${skillId}`, { title, description });
+      await api.put(`/v1/users/skills/soft/${skillId}`, { title, description });
       set((state) => ({
         softSkills: state.softSkills.map((s) => 
           s.id === skillId ? { ...s, title, description: description || '' } : s
@@ -134,7 +134,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
 
   removeSoftSkill: async (userId: string, skillId: string) => {
     try {
-      await api.delete(`/users/${userId}/skills/soft/${skillId}`);
+      await api.delete(`/v1/users/${userId}/skills/soft/${skillId}`);
       set((state) => ({
         softSkills: state.softSkills.filter((s) => s.id !== skillId),
       }));
@@ -146,7 +146,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
   toggleTopSkill: async (userId: string, skillId: string) => {
     set({ loading: true });
     try {
-        await api.put(`/users/${userId}/skills/hard/${skillId}/top`);
+        await api.put(`/v1/users/${userId}/skills/hard/${skillId}/top`);
         await get().fetchHardSkills(userId);
         set({ loading: false });
     } catch (err) {
@@ -158,7 +158,7 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
     console.log('=== REORDER ===', { userId, skillIds }); // 👈 agrega esto
     set({ loading: true });
     try {
-        await api.put(`/users/${userId}/skills/hard/top/reorder`, { skillIds });
+        await api.put(`/v1/users/${userId}/skills/hard/top/reorder`, { skillIds });
         await get().fetchHardSkills(userId);
         set({ loading: false });
     } catch (err) {
