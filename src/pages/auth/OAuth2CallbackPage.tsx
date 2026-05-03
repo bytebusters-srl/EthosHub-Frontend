@@ -6,10 +6,10 @@ import type { User, UserRole } from '@/shared/types';
 import { ROLE_REDIRECT_PATHS } from '@/shared/services/authService';
 
 type JwtPayload = {
-  userId?: string | number;
+  userId?: string; 
   email?: string;
   username?: string;
-  userType?: string;
+  userType?: string; 
   exp?: number;
 };
 
@@ -23,9 +23,7 @@ function base64UrlDecode(value: string): string {
 function decodeJwtPayload(token: string): JwtPayload | null {
   try {
     const parts = token.split('.');
-    if (parts.length < 2) {
-      return null;
-    }
+    if (parts.length < 2) return null;
     const raw = base64UrlDecode(parts[1]);
     return JSON.parse(raw) as JwtPayload;
   } catch {
@@ -34,12 +32,9 @@ function decodeJwtPayload(token: string): JwtPayload | null {
 }
 
 function mapUserTypeToRole(userType?: string): UserRole {
-  if (userType === 'RECLUTADOR') {
-    return 'recruiter';
-  }
-  if (userType === 'ADMINISTRADOR') {
-    return 'admin';
-  }
+  const type = userType?.toUpperCase();
+  if (type === 'RECLUTADOR' || type === 'RECRUITER') return 'recruiter';
+  if (type === 'ADMINISTRADOR' || type === 'ADMIN') return 'admin';
   return 'professional';
 }
 
@@ -49,18 +44,22 @@ function sanitizeSlug(value: string): string {
 }
 
 function buildUserFromToken(payload: JwtPayload): User {
+  if (!payload.userId) {
+    throw new Error('El token recibido no contiene un identificador válido (UUID).');
+  }
+
   const email = payload.email || '';
-  const username = payload.username || (email.includes('@') ? email.split('@')[0] : 'oauth-user');
+  const displayName = payload.username || (email.includes('@') ? email.split('@')[0] : 'oauth-user');
   const role = mapUserTypeToRole(payload.userType);
 
   return {
-    id: String(payload.userId || `oauth-${Date.now()}`),
+    id: payload.userId, 
     email,
-    name: username,
-    username,
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(email || username)}`,
+    name: displayName,
+    username: displayName.toLowerCase().replace(/\s+/g, ''),
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
     role,
-    slug: sanitizeSlug(username),
+    slug: sanitizeSlug(displayName),
     profession: role === 'recruiter' ? 'Reclutador' : role === 'admin' ? 'Administrador' : 'Profesional',
     bio: '',
     headline: role === 'recruiter' ? 'Encontrando talento verificado' : 'Construyendo mi perfil profesional',
@@ -78,56 +77,56 @@ export default function OAuth2CallbackPage() {
   useEffect(() => {
     const error = searchParams.get('error');
     if (error) {
-      toast.error('No se pudo iniciar con OAuth2', {
-        description: error,
-      });
+      toast.error('No se pudo iniciar con OAuth2', { description: error });
       navigate('/login', { replace: true });
       return;
     }
 
     const token = searchParams.get('token');
-    const tokenType = searchParams.get('tokenType') || 'Bearer';
-    const expiresInValue = searchParams.get('expiresIn');
-    const action = searchParams.get('action');
-
+    
     if (!token) {
-      toast.error('Respuesta OAuth2 incompleta', {
-        description: 'No se recibio token de acceso.',
-      });
+      toast.error('Respuesta OAuth2 incompleta');
       navigate('/login', { replace: true });
       return;
     }
 
     const payload = decodeJwtPayload(token);
     if (!payload) {
-      toast.error('Token OAuth2 invalido');
+      toast.error('Token OAuth2 inválido');
       navigate('/login', { replace: true });
       return;
     }
 
-    const user = buildUserFromToken(payload);
-    const expiresIn = expiresInValue ? Number(expiresInValue) : undefined;
+    try {
+      const user = buildUserFromToken(payload);
 
-    completeOAuthLogin({
-      user,
-      token,
-      tokenType,
-      expiresIn: Number.isFinite(expiresIn) ? expiresIn : undefined,
-    });
+      completeOAuthLogin({
+        user,
+        token,
+        tokenType: 'Bearer',
+      });
 
-    const isRegistration = action?.toUpperCase().includes('REGISTER');
-    toast.success(isRegistration ? 'Cuenta creada con OAuth2' : 'Inicio de sesion con OAuth2 exitoso', {
-      description: `Bienvenido, ${user.name}`,
-    });
+      toast.success('Sesión iniciada correctamente', {
+        description: `Bienvenido, ${user.name}`,
+      });
 
-    navigate(ROLE_REDIRECT_PATHS[user.role], { replace: true });
+      navigate(ROLE_REDIRECT_PATHS[user.role], { replace: true });
+    } catch (err) {
+      console.error("Error crítico en OAuth Callback:", err);
+      toast.error('Error de autenticación', { 
+        description: err instanceof Error ? err.message : 'Token corrupto' 
+      });
+      const logout = useAuthStore.getState().logout;
+      if (logout) logout();
+      navigate('/login', { replace: true });
+    }
   }, [completeOAuthLogin, navigate, searchParams]);
 
   return (
     <div className="flex min-h-[45vh] items-center justify-center px-6 text-center">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Procesando inicio de sesion...</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Conectando tu cuenta OAuth2 con EthosHub.</p>
+      <div className="animate-pulse">
+        <h1 className="text-2xl font-bold text-foreground">Procesando inicio de sesión...</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Conectando con el servidor...</p>
       </div>
     </div>
   );

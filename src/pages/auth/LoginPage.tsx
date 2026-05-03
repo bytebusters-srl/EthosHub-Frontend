@@ -16,9 +16,12 @@ type RegisterPrefills = {
   password?: string;
   fromRegister?: boolean;
   fullName?: string;
+  role?: 'professional' | 'recruiter' | 'admin' | 'guest';
 };
 
-const OAUTH_BASE_URL = ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
+const OAUTH_BASE_URL = (((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL
+  || ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_URL)
+  || 'http://localhost:8080')).replace(/\/$/, '');
 
 export default function LoginPage() {
   const location = useLocation();
@@ -52,7 +55,7 @@ export default function LoginPage() {
       });
 
       if (result.user.role === 'professional' && shouldStartSkillOnboarding(result.user.email)) {
-        navigate('/dashboard/skills?onboarding=1');
+        navigate('/dashboard');
         return;
       }
       navigate(result.redirectPath);
@@ -64,7 +67,8 @@ export default function LoginPage() {
   };
 
   const handleOAuth = (provider: 'google' | 'github') => {
-    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/${provider}`;
+    const selectedRole = prefills?.role ? `?role=${prefills.role.toUpperCase()}` : '';
+    window.location.href = `${OAUTH_BASE_URL}/oauth2/authorization/${provider}${selectedRole}`;
   };
 
   return (

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase,
   CalendarRange,
-  MapPin,
+  Layers3,
   Plus,
   Pencil,
   X,
@@ -11,7 +11,6 @@ import {
   Building2,
   Calendar,
   Sparkles,
-  Layers3,
   ChevronDown,
   ChevronUp,
   Loader2,
@@ -19,21 +18,7 @@ import {
 import { Button } from '@/shared/ui';
 import { useAuthStore } from '@/store/authStore';
 import { experienceService } from '@/shared/services/experienceService';
-
-interface WorkExperience {
-  id: string;
-  userId: string;
-  companyName: string;
-  jobTitle: string;
-  location: string;
-  startDate: string;
-  endDate?: string;
-  isCurrent: boolean;
-  description: string;
-  technologies?: string[];
-  createdAt: string;
-  updatedAt: string;
-}
+import { WorkExperience } from '@/shared/types/experience';
 
 const statItems = [
   { label: 'Años construyendo producto', value: '6+' },
@@ -102,10 +87,11 @@ export default function ExperiencePage() {
         companyName: editingExperience.companyName,
         jobTitle: editingExperience.jobTitle,
         location: editingExperience.location || '',
-        startDate: editingExperience.startDate,
+        startDate: editingExperience.startDate || '',
         endDate: editingExperience.endDate || '',
         isCurrent: editingExperience.isCurrent,
         description: editingExperience.description || '',
+        // Convertimos el arreglo a string separado por comas para el input
         technologies: editingExperience.technologies?.join(', ') || '',
       });
     } else {
@@ -155,14 +141,12 @@ export default function ExperiencePage() {
     if (!formData.jobTitle.trim()) newErrors.jobTitle = 'Obligatorio';
     if (!formData.startDate) newErrors.startDate = 'Obligatorio';
     
-    // CORRECCIÓN 1: Descripción obligatoria
     if (!formData.description.trim()) newErrors.description = 'La descripción es obligatoria';
 
     if (!formData.isCurrent) {
       if (!formData.endDate) {
         newErrors.endDate = 'Obligatorio';
       } 
-      // CORRECCIÓN 3: La fecha de fin no puede ser anterior a la de inicio
       else if (formData.startDate && new Date(formData.endDate) < new Date(formData.startDate)) {
         newErrors.endDate = 'La fecha final no puede ser antes del inicio';
       }
@@ -179,10 +163,20 @@ export default function ExperiencePage() {
     if (validateForm()) {
       setIsSaving(true);
       try {
-        if (editingExperience) {
-          await experienceService.updateExperience(user.id, editingExperience.id, formData);
+        // Transformamos formData a Partial<WorkExperience>
+        const payload: Partial<WorkExperience> = {
+          ...formData,
+          // Convertimos el texto separado por comas a un arreglo de strings
+          technologies: formData.technologies 
+            ? formData.technologies.split(',').map(t => t.trim()).filter(Boolean) 
+            : []
+        };
+
+        if (editingExperience && editingExperience.workExperienceId) {
+          // El signo ! le asegura a TypeScript que no es undefined
+          await experienceService.updateExperience(user.id, editingExperience.workExperienceId!, payload);
         } else {
-          await experienceService.addExperience(user.id, formData);
+          await experienceService.addExperience(user.id, payload);
         }
         await loadExperiences();
         closeModal();
@@ -198,11 +192,12 @@ export default function ExperiencePage() {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!user?.id || !editingExperience?.id) return;
+    if (!user?.id || !editingExperience?.workExperienceId) return;
     
     setIsSaving(true);
     try {
-      await experienceService.deleteExperience(user.id, editingExperience.id);
+      // Le ponemos el ! para que TS sepa que pasó la validación de arriba
+      await experienceService.deleteExperience(user.id, editingExperience.workExperienceId!);
       await loadExperiences();
       closeModal();
     } catch (error) {
@@ -212,7 +207,7 @@ export default function ExperiencePage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     const offset = date.getTimezoneOffset() * 60000;
@@ -289,9 +284,12 @@ export default function ExperiencePage() {
           ) : (
             <div className="space-y-4 sm:space-y-5">
               {experiences.map((experience, index) => {
-                const isExpanded = expandedCards.has(experience.id);
+                // Generamos un ID de forma segura para TS
+                const expId = experience.workExperienceId || `temp-${index}`;
+                const isExpanded = expandedCards.has(expId);
+                
                 return (
-                  <motion.article key={experience.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} whileHover={{ scale: 1.005 }} className="relative rounded-2xl border border-border bg-background/60 p-4 transition-colors hover:border-primary/30 sm:p-5 dark:bg-black/40">
+                  <motion.article key={expId} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} whileHover={{ scale: 1.005 }} className="relative rounded-2xl border border-border bg-background/60 p-4 transition-colors hover:border-primary/30 sm:p-5 dark:bg-black/40">
                     {index < experiences.length - 1 && <div className="absolute left-[1.35rem] top-full h-5 w-px bg-border" />}
                     <div className="flex gap-4">
                       <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -307,7 +305,7 @@ export default function ExperiencePage() {
                             <div className="space-y-1 text-sm text-muted-foreground sm:text-right">
                               <div className="inline-flex items-center gap-2">
                                 <CalendarRange className="h-4 w-4" />
-                                {formatDate(experience.startDate)} - {experience.isCurrent ? 'Actualidad' : formatDate(experience.endDate || '')}
+                                {formatDate(experience.startDate)} - {experience.isCurrent ? 'Actualidad' : formatDate(experience.endDate)}
                               </div>
                             </div>
                             <button onClick={() => openEditModal(experience)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
@@ -319,7 +317,7 @@ export default function ExperiencePage() {
                           <div className="mt-3">
                             <p className={`text-sm leading-6 text-muted-foreground ${!isExpanded ? 'line-clamp-2' : ''}`}>{experience.description}</p>
                             {experience.description.length > 150 && (
-                              <button onClick={() => toggleCardExpanded(experience.id)} className="mt-1 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80">
+                              <button onClick={() => toggleCardExpanded(expId)} className="mt-1 flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80">
                                 {isExpanded ? <>Ver menos <ChevronUp className="h-3 w-3" /></> : <>Ver más <ChevronDown className="h-3 w-3" /></>}
                               </button>
                             )}
@@ -383,24 +381,22 @@ export default function ExperiencePage() {
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                       
-                      {/* CORRECCIÓN 2: El evento showPicker abre el calendario nativo al hacer clic */}
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 text-sm font-medium text-foreground"><Calendar className="h-4 w-4 text-muted-foreground" /> Inicio *</label>
                         <input 
                           type="date" 
-                          value={formData.startDate} 
+                          value={formData.startDate.split('T')[0]} 
                           onClick={(e) => e.currentTarget.showPicker && e.currentTarget.showPicker()}
                           onChange={(e) => setFormData((prev) => ({ ...prev, startDate: e.target.value }))} 
                           className={`w-full rounded-xl border bg-background px-4 py-3 text-foreground cursor-pointer ${errors.startDate ? 'border-destructive' : 'border-border'}`} 
                         />
                       </div>
                       
-                      {/* CORRECCIÓN 3: Propiedad min={} añadida para evitar fechas pasadas */}
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 text-sm font-medium text-foreground"><Calendar className="h-4 w-4 text-muted-foreground" /> Fin</label>
                         <input 
                           type="date" 
-                          value={formData.endDate} 
+                          value={formData.endDate.split('T')[0]} 
                           min={formData.startDate}
                           disabled={formData.isCurrent} 
                           onClick={(e) => e.currentTarget.showPicker && e.currentTarget.showPicker()}
@@ -429,6 +425,19 @@ export default function ExperiencePage() {
                       />
                       {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
                     </div>
+                    
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <Layers3 className="h-4 w-4 text-muted-foreground" /> Tecnologías (separadas por comas)
+                      </label>
+                      <input 
+                        type="text" 
+                        placeholder="React, Spring Boot, PostgreSQL"
+                        value={formData.technologies} 
+                        onChange={(e) => setFormData((prev) => ({ ...prev, technologies: e.target.value }))} 
+                        className="w-full rounded-xl border bg-background px-4 py-3 text-foreground border-border" 
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -453,7 +462,7 @@ export default function ExperiencePage() {
                   </div>
                   <div className="flex gap-2">
                     <Button type="button" variant="ghost" onClick={(e) => { e.preventDefault(); closeModal(); }}>Cancelar</Button>
-                    <Button type="submit" variant="primary" disabled={isSaving} className="gap-2 bg-primary">
+                    <Button type="submit" variant="primary" disabled={isSaving} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
                       {isSaving && <Loader2 className="h-4 w-4 animate-spin" />} Guardar
                     </Button>
                   </div>
