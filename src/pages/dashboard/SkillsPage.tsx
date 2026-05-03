@@ -41,9 +41,10 @@ const skillLevels: { value: SkillLevel; label: string }[] = [
 const categories: SkillCategory[] = [
   'Frontend',
   'Backend',
-  'Bases de Datos',
-  'Infraestructura',
-  'Otras Tecnologías',
+  'Data',
+  'Infrastructure',
+  'Mobile',
+  'Design',
 ];
 
 export default function SkillsPage() {
@@ -239,6 +240,15 @@ export default function SkillsPage() {
     return acc;
   }, {} as Record<string, typeof filteredSkills>);
 
+  const categoryLabels: Record<string, string> = {
+    Frontend:       'Frontend',
+    Backend:        'Backend',
+    Data:           'Bases de Datos',
+    Infrastructure: 'Infraestructura',
+    Mobile:         'Mobile',
+    Design:         'Diseño',
+  };
+
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -369,8 +379,13 @@ export default function SkillsPage() {
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
             options={[
-              { value: 'all', label: 'Todas las categorías' },
-              ...categories.map((c) => ({ value: c, label: c })),
+                  { value: 'all',            label: 'Todas las categorías' },
+    { value: 'Frontend',       label: 'Frontend' },
+    { value: 'Backend',        label: 'Backend' },
+    { value: 'Data',           label: 'Bases de Datos' },
+    { value: 'Infrastructure', label: 'Infraestructura' },
+    { value: 'Mobile',         label: 'Mobile' },
+    { value: 'Design',         label: 'Diseño' },
             ]}
             className="w-48"
           />
@@ -394,7 +409,7 @@ export default function SkillsPage() {
               animate={{ opacity: 1, y: 0 }}
             >
               <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                {category}
+                {categoryLabels[category] ?? category}
               </h3>
               <div className="grid gap-3 md:grid-cols-2">
                 {skills.map((skill) => (
