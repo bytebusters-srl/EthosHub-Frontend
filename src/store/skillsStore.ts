@@ -135,6 +135,26 @@ export const useSkillsStore = create<SkillsStore>((set, get) => ({
     }
   },
 
-  toggleTopSkill: async () => {},
-  reorderTopSkills: async () => {},
+  toggleTopSkill: async (userId: string, skillId: string) => {
+    set({ loading: true });
+    try {
+        await api.put(`/users/${userId}/skills/hard/${skillId}/top`);
+        await get().fetchHardSkills(userId);
+        set({ loading: false });
+    } catch (err) {
+        set({ error: 'Error al actualizar top skill', loading: false });
+    }
+},
+
+reorderTopSkills: async (userId: string, skillIds: string[]) => {
+    console.log('=== REORDER ===', { userId, skillIds }); // 👈 agrega esto
+    set({ loading: true });
+    try {
+        await api.put(`/users/${userId}/skills/hard/top/reorder`, { skillIds });
+        await get().fetchHardSkills(userId);
+        set({ loading: false });
+    } catch (err) {
+        set({ error: 'Error al reordenar', loading: false });
+    }
+},
 }));
